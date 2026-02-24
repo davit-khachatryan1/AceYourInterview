@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from '@/lib/firebase'; // Make sure app is exported from firebase.ts

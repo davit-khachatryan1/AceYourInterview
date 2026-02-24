@@ -1,3 +1,5 @@
+"use client";
+
 import Sidebar from "@/components/Sidebar";
 import DualLanguageToggle from "@/components/DualLanguageToggle";
 import InterviewCard from "@/components/InterviewCard";

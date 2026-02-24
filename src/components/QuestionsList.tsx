@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { useQuestions } from '@/hooks/useQuestions';
 import { doc, deleteDoc } from 'firebase/firestore';
