@@ -18,9 +18,27 @@ Open `http://localhost:3000`.
 cp .env.example .env.local
 ```
 
-2. Fill all `NEXT_PUBLIC_FIREBASE_*` values from your Firebase project settings.
+2. Fill all `NEXT_PUBLIC_FIREBASE_*` values in `.env.local` from your Firebase project settings, including `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` if you want Analytics enabled.
 
 3. Add admin emails in `NEXT_PUBLIC_ADMIN_ALLOWLIST` (comma-separated) to access `/admin`.
+
+## AI-Assisted Admin Parsing
+
+To use the single-input AI parser in the admin create flow, also add:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_ADMIN_PARSER_MODEL=gpt-4o-mini
+ANTHROPIC_API_KEY=your_anthropic_api_key
+ANTHROPIC_ADMIN_PARSER_MODEL=claude-3-5-sonnet-latest
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_ADMIN_PARSER_MODEL=gemini-1.5-pro
+ADMIN_ALLOWLIST=admin@example.com
+```
+
+- `ADMIN_ALLOWLIST` is optional. If omitted, the server parser route falls back to `NEXT_PUBLIC_ADMIN_ALLOWLIST`.
+- The admin create form lets you choose `OpenAI`, `Claude`, or `Gemini` before parsing. Only the provider you choose needs its matching API key configured.
+- The parser never saves the raw mixed input directly. It only returns a structured draft for review before the question is saved.
 
 ## Demo Mode behavior
 

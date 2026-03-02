@@ -7,20 +7,25 @@ const placeholders = new Set([
   'YOUR_APP_ID',
 ]);
 
-const readEnv = (key: string, fallback: string): string => {
-  const value = process.env[key];
-  return value && value.trim().length > 0 ? value : fallback;
+const requiredFirebaseConfig = {
+  apiKey:
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim() || 'AIzaSyCKdJWXUurX2tuTRLsBhIibXeolJBjEWI0',
+  authDomain:
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN?.trim() || 'aceyourinterview-b01c1.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim() || 'aceyourinterview-b01c1',
+  storageBucket:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() ||
+    'aceyourinterview-b01c1.firebasestorage.app',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim() || '797177152128',
+  appId:
+    process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim() || '1:797177152128:web:393398930d17a75ab71c65',
 };
 
 export const firebaseConfig = {
-  apiKey: readEnv('NEXT_PUBLIC_FIREBASE_API_KEY', 'YOUR_API_KEY'),
-  authDomain: readEnv('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN', 'YOUR_AUTH_DOMAIN'),
-  projectId: readEnv('NEXT_PUBLIC_FIREBASE_PROJECT_ID', 'YOUR_PROJECT_ID'),
-  storageBucket: readEnv('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET', 'YOUR_STORAGE_BUCKET'),
-  messagingSenderId: readEnv('NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID', 'YOUR_MESSAGING_SENDER_ID'),
-  appId: readEnv('NEXT_PUBLIC_FIREBASE_APP_ID', 'YOUR_APP_ID'),
+  ...requiredFirebaseConfig,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID?.trim() || 'G-VYETEKLGLT',
 };
 
-export const isFirebaseConfigured = Object.values(firebaseConfig).every(
+export const isFirebaseConfigured = Object.values(requiredFirebaseConfig).every(
   (value) => value.trim().length > 0 && !placeholders.has(value),
 );

@@ -4,21 +4,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-
-const getAllowlist = (): string[] => {
-  const raw = process.env.NEXT_PUBLIC_ADMIN_ALLOWLIST ?? '';
-  return raw
-    .split(',')
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean);
-};
+import { isAllowedAdminEmail, parseAllowlist } from '@/lib/adminAllowlist';
 
 const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
   const AuthComponent = (props: P) => {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const allowlist = useMemo(() => getAllowlist(), []);
+    const allowlist = useMemo(
+      () => parseAllowlist(process.env.NEXT_PUBLIC_ADMIN_ALLOWLIST ?? ''),
+      [],
+    );
 
     useEffect(() => {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -28,9 +24,7 @@ const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) =>
           return;
         }
 
-        const email = currentUser.email?.toLowerCase();
-        const isAllowed =
-          allowlist.length === 0 ? !!email : !!email && allowlist.includes(email);
+        const isAllowed = isAllowedAdminEmail(currentUser.email, allowlist);
 
         if (!isAllowed) {
           router.replace('/');

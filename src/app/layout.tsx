@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google';
+import FirebaseAnalyticsBootstrap from '@/components/FirebaseAnalyticsBootstrap';
 import ThemeInitializer from '@/components/ThemeInitializer';
 import './globals.css';
 
@@ -54,13 +55,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en" data-theme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
+        <FirebaseAnalyticsBootstrap />
         <ThemeInitializer />
         {children}
       </body>

@@ -1,100 +1,126 @@
 'use client';
 
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import AdminExamplesEditor from '@/components/AdminExamplesEditor';
 import AdminTagEditor from '@/components/AdminTagEditor';
-import { db } from '@/lib/firebase';
-import type { QuestionExampleRecord } from '@/types/interview';
+import {
+  adminAiProviderOptions,
+  defaultAdminAiProvider,
+  type AdminAiProvider,
+} from '@/lib/adminAiProviders';
+import {
+  adminDraftFieldLabels,
+  buildQuestionPayload,
+  createEmptyAdminQuestionDraft,
+  validateAdminQuestionDraft,
+  type AdminParseResult,
+  type AdminQuestionDraft,
+  type AdminQuestionDraftField,
+} from '@/lib/adminQuestionDraft';
+import { auth, db } from '@/lib/firebase';
 
 interface AddQuestionFormProps {
   onCreated?: () => void;
 }
 
-const initialState = {
-  topicId: '',
-  enText: '',
-  amText: '',
-  enAnswer: '',
-  amAnswer: '',
-  enExplanation: '',
-  amExplanation: '',
-  enPitfalls: '',
-  amPitfalls: '',
-  enFollowups: '',
-  amFollowups: '',
-  codeSnippet: '',
-  codeLanguage: 'tsx',
-};
+type ParseStatus = 'idle' | 'parsing' | 'parsed' | 'failed';
 
-const createEmptyExample = (): QuestionExampleRecord => ({
-  id: 'example-1',
-  en_title: '',
-  am_title: '',
-  en_description: '',
-  am_description: '',
-  codeSnippet: '',
-  codeLanguage: 'tsx',
-});
+const topicOverrideOptions = ['react', 'javascript'] as const;
 
-const toList = (value: string): string[] => value.split('\n').map((entry) => entry.trim()).filter(Boolean);
-
-const normalizeExamples = (examples: QuestionExampleRecord[]): QuestionExampleRecord[] =>
-  examples.map((example, index) => ({
-    id: example.id?.trim() || `example-${index + 1}`,
-    en_title: example.en_title?.trim() || '',
-    am_title: example.am_title?.trim() || '',
-    en_description: example.en_description?.trim() || '',
-    am_description: example.am_description?.trim() || '',
-    codeSnippet: example.codeSnippet?.trim() || '',
-    codeLanguage: example.codeLanguage?.trim() || 'tsx',
-  }));
+const getLabelClassName = (highlight: boolean): string =>
+  highlight
+    ? 'mb-1.5 block text-sm text-[color-mix(in_srgb,var(--burnt-tangerine)_88%,white)]'
+    : 'mb-1.5 block text-sm text-[var(--text-2)]';
 
 const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
-  const [form, setForm] = useState(initialState);
-  const [tags, setTags] = useState<string[]>([]);
-  const [examples, setExamples] = useState<QuestionExampleRecord[]>([createEmptyExample()]);
+  const [rawInput, setRawInput] = useState('');
+  const [provider, setProvider] = useState<AdminAiProvider>(defaultAdminAiProvider);
+  const [topicOverride, setTopicOverride] = useState('');
+  const [draft, setDraft] = useState<AdminQuestionDraft>(createEmptyAdminQuestionDraft());
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [hasParsedDraft, setHasParsedDraft] = useState(false);
+  const [parseStatus, setParseStatus] = useState<ParseStatus>('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const validation = useMemo(() => validateAdminQuestionDraft(draft), [draft]);
+
+  const setDraftField = <K extends keyof AdminQuestionDraft>(
+    field: K,
+    value: AdminQuestionDraft[K],
+  ) => {
+    setDraft((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const isMissingField = (field: AdminQuestionDraftField): boolean =>
+    hasParsedDraft && validation.missingFields.includes(field);
+
+  const handleParse = async () => {
+    if (!rawInput.trim()) {
+      setError('Paste the full mixed question content before parsing.');
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      setError('You need an active admin session before using AI parsing.');
+      return;
+    }
+
+    setParseStatus('parsing');
+    setError(null);
+
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/admin/parse-question', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider,
+          rawInput,
+          topicOverride,
+        }),
+      });
+
+      const payload = (await response.json()) as Partial<AdminParseResult> & {
+        message?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(payload.message || 'The AI parser could not process this input.');
+      }
+
+      if (!payload.draft) {
+        throw new Error('The AI parser returned an empty draft.');
+      }
+
+      setDraft(payload.draft);
+      setWarnings(Array.isArray(payload.warnings) ? payload.warnings : []);
+      setHasParsedDraft(true);
+      setParseStatus('parsed');
+    } catch (parseError) {
+      setParseStatus('failed');
+      setError((parseError as Error).message);
+    }
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    const enPitfalls = toList(form.enPitfalls);
-    const amPitfalls = toList(form.amPitfalls);
-    const enFollowups = toList(form.enFollowups);
-    const amFollowups = toList(form.amFollowups);
-    const normalizedExamples = normalizeExamples(examples);
+    if (!hasParsedDraft) {
+      setError('Parse the mixed question content before saving.');
+      return;
+    }
 
-    const isBaseInvalid =
-      !form.topicId.trim() ||
-      !form.enText.trim() ||
-      !form.amText.trim() ||
-      !form.enAnswer.trim() ||
-      !form.amAnswer.trim() ||
-      !form.enExplanation.trim() ||
-      !form.amExplanation.trim();
-
-    const areListsInvalid =
-      enPitfalls.length === 0 ||
-      amPitfalls.length === 0 ||
-      enFollowups.length === 0 ||
-      amFollowups.length === 0;
-
-    const hasInvalidExample =
-      normalizedExamples.length === 0 ||
-      normalizedExamples.some(
-        (example) =>
-          !example.en_title ||
-          !example.am_title ||
-          !example.en_description ||
-          !example.am_description ||
-          !example.codeSnippet ||
-          !example.codeLanguage,
-      );
-
-    if (isBaseInvalid || areListsInvalid || hasInvalidExample) {
-      setError('All bilingual detail fields and at least one complete example are required.');
+    if (!validation.canSave) {
+      setError('Review the missing required fields before saving.');
       return;
     }
 
@@ -103,30 +129,16 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
 
     try {
       await addDoc(collection(db, 'questions'), {
-        topicId: form.topicId.trim(),
-        topic: form.topicId.trim(),
-        en_text: form.enText.trim(),
-        am_text: form.amText.trim(),
-        en_answer: form.enAnswer.trim(),
-        am_answer: form.amAnswer.trim(),
-        en_explanation: form.enExplanation.trim(),
-        am_explanation: form.amExplanation.trim(),
-        en_pitfalls: enPitfalls,
-        am_pitfalls: amPitfalls,
-        en_followups: enFollowups,
-        am_followups: amFollowups,
-        examples: normalizedExamples,
-        question: form.enText.trim(),
-        answer: form.enAnswer.trim(),
-        tags,
-        codeSnippet: form.codeSnippet.trim() || normalizedExamples[0]!.codeSnippet,
-        codeLanguage: form.codeLanguage.trim() || normalizedExamples[0]!.codeLanguage,
+        ...buildQuestionPayload(draft),
         updatedAt: serverTimestamp(),
       });
 
-      setForm(initialState);
-      setTags([]);
-      setExamples([createEmptyExample()]);
+      setRawInput('');
+      setTopicOverride('');
+      setDraft(createEmptyAdminQuestionDraft());
+      setWarnings([]);
+      setHasParsedDraft(false);
+      setParseStatus('idle');
       onCreated?.();
     } catch (submitError) {
       setError((submitError as Error).message);
@@ -143,156 +155,360 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
         </p>
       )}
 
-      <div>
-        <label htmlFor="topicId" className="mb-1.5 block text-sm text-[var(--text-2)]">Topic ID</label>
-        <input
-          id="topicId"
-          value={form.topicId}
-          onChange={(event) => setForm((current) => ({ ...current, topicId: event.target.value }))}
-          className="search-input w-full"
-          placeholder="react"
-        />
-      </div>
+      <div className="space-y-4 rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_74%,transparent)] p-4">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+            Step 1
+          </p>
+          <h3 className="mt-2 text-lg font-semibold text-[var(--text-1)]">Paste Full Question Content</h3>
+          <p className="mt-1 text-sm text-[var(--text-2)]">
+            Paste one mixed block of English, Armenian, examples, tags, and code. AI will sort it into the existing question fields for review.
+          </p>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="enText" className="mb-1.5 block text-sm text-[var(--text-2)]">Question (ENG)</label>
-          <textarea
-            id="enText"
-            value={form.enText}
-            onChange={(event) => setForm((current) => ({ ...current, enText: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-        <div>
-          <label htmlFor="amText" className="mb-1.5 block text-sm text-[var(--text-2)]">Question (ARM)</label>
-          <textarea
-            id="amText"
-            value={form.amText}
-            onChange={(event) => setForm((current) => ({ ...current, amText: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="enAnswer" className="mb-1.5 block text-sm text-[var(--text-2)]">Answer (ENG)</label>
-          <textarea
-            id="enAnswer"
-            value={form.enAnswer}
-            onChange={(event) => setForm((current) => ({ ...current, enAnswer: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-        <div>
-          <label htmlFor="amAnswer" className="mb-1.5 block text-sm text-[var(--text-2)]">Answer (ARM)</label>
-          <textarea
-            id="amAnswer"
-            value={form.amAnswer}
-            onChange={(event) => setForm((current) => ({ ...current, amAnswer: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="enExplanation" className="mb-1.5 block text-sm text-[var(--text-2)]">Explanation (ENG)</label>
-          <textarea
-            id="enExplanation"
-            value={form.enExplanation}
-            onChange={(event) => setForm((current) => ({ ...current, enExplanation: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-        <div>
-          <label htmlFor="amExplanation" className="mb-1.5 block text-sm text-[var(--text-2)]">Explanation (ARM)</label>
-          <textarea
-            id="amExplanation"
-            value={form.amExplanation}
-            onChange={(event) => setForm((current) => ({ ...current, amExplanation: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="enPitfalls" className="mb-1.5 block text-sm text-[var(--text-2)]">Pitfalls (ENG, one per line)</label>
-          <textarea
-            id="enPitfalls"
-            value={form.enPitfalls}
-            onChange={(event) => setForm((current) => ({ ...current, enPitfalls: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-        <div>
-          <label htmlFor="amPitfalls" className="mb-1.5 block text-sm text-[var(--text-2)]">Pitfalls (ARM, one per line)</label>
-          <textarea
-            id="amPitfalls"
-            value={form.amPitfalls}
-            onChange={(event) => setForm((current) => ({ ...current, amPitfalls: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="enFollowups" className="mb-1.5 block text-sm text-[var(--text-2)]">Follow-ups (ENG, one per line)</label>
-          <textarea
-            id="enFollowups"
-            value={form.enFollowups}
-            onChange={(event) => setForm((current) => ({ ...current, enFollowups: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-        <div>
-          <label htmlFor="amFollowups" className="mb-1.5 block text-sm text-[var(--text-2)]">Follow-ups (ARM, one per line)</label>
-          <textarea
-            id="amFollowups"
-            value={form.amFollowups}
-            onChange={(event) => setForm((current) => ({ ...current, amFollowups: event.target.value }))}
-            className="search-input min-h-24 w-full"
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="codeLanguage" className="mb-1.5 block text-sm text-[var(--text-2)]">Primary code language</label>
-          <input
-            id="codeLanguage"
-            value={form.codeLanguage}
-            onChange={(event) => setForm((current) => ({ ...current, codeLanguage: event.target.value }))}
+          <label htmlFor="provider" className="mb-1.5 block text-sm text-[var(--text-2)]">
+            AI provider
+          </label>
+          <select
+            id="provider"
+            value={provider}
+            onChange={(event) => setProvider(event.target.value as AdminAiProvider)}
             className="search-input w-full"
-          />
+          >
+            {adminAiProviderOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
+
         <div>
-          <label htmlFor="codeSnippet" className="mb-1.5 block text-sm text-[var(--text-2)]">Primary code snippet</label>
+          <label htmlFor="topicOverride" className="mb-1.5 block text-sm text-[var(--text-2)]">
+            Topic ID override (optional)
+          </label>
+          <select
+            id="topicOverride"
+            value={topicOverride}
+            onChange={(event) => setTopicOverride(event.target.value)}
+            className="search-input w-full"
+          >
+            <option value="">Auto-detect from content</option>
+            {topicOverrideOptions.map((topicId) => (
+              <option key={topicId} value={topicId}>
+                {topicId}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="rawInput" className="mb-1.5 block text-sm text-[var(--text-2)]">
+            Mixed source text
+          </label>
           <textarea
-            id="codeSnippet"
-            value={form.codeSnippet}
-            onChange={(event) => setForm((current) => ({ ...current, codeSnippet: event.target.value }))}
-            className="search-input min-h-24 w-full font-mono text-xs"
+            id="rawInput"
+            value={rawInput}
+            onChange={(event) => setRawInput(event.target.value)}
+            className="search-input min-h-56 w-full"
+            placeholder="Paste the full mixed question draft here..."
           />
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={handleParse}
+            disabled={parseStatus === 'parsing'}
+            className="btn-secondary px-4 py-2 text-sm font-semibold"
+          >
+            {parseStatus === 'parsing'
+              ? 'Parsing...'
+              : hasParsedDraft
+                ? 'Parse Again'
+                : 'Parse with AI'}
+          </button>
+          {hasParsedDraft && (
+            <p className="self-center text-sm text-[var(--text-2)]">
+              Parsed draft ready. Review the structured fields below before saving.
+            </p>
+          )}
         </div>
       </div>
 
-      <div>
-        <p className="mb-2 text-sm text-[var(--text-2)]">Examples (required)</p>
-        <AdminExamplesEditor examples={examples} onChange={setExamples} />
-      </div>
+      {hasParsedDraft && (
+        <div className="space-y-5">
+          <div className="space-y-4 rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_74%,transparent)] p-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+                Step 2
+              </p>
+              <h3 className="mt-2 text-lg font-semibold text-[var(--text-1)]">Review Parsed Content</h3>
+              <p className="mt-1 text-sm text-[var(--text-2)]">
+                Fix anything AI sorted incorrectly, then save the question to Firestore using the same schema as the current site.
+              </p>
+            </div>
 
-      <div>
-        <p className="mb-1.5 text-sm text-[var(--text-2)]">Category tags</p>
-        <AdminTagEditor tags={tags} onChange={setTags} />
-      </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+                  Missing required fields
+                </p>
+                {validation.missingFields.length === 0 ? (
+                  <p className="mt-2 text-sm text-[var(--text-2)]">All required fields are ready.</p>
+                ) : (
+                  <ul className="mt-2 space-y-1 text-sm text-[var(--text-1)]">
+                    {validation.missingFields.map((field) => (
+                      <li key={field}>{adminDraftFieldLabels[field]}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
-      <button type="submit" disabled={isSubmitting} className="btn-primary px-4 py-2 text-sm font-semibold">
-        {isSubmitting ? 'Saving...' : 'Add Question'}
-      </button>
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+                  Parser warnings
+                </p>
+                {warnings.length === 0 ? (
+                  <p className="mt-2 text-sm text-[var(--text-2)]">No parser warnings.</p>
+                ) : (
+                  <ul className="mt-2 space-y-1 text-sm text-[var(--text-1)]">
+                    {warnings.map((warning, index) => (
+                      <li key={`${warning}-${index}`}>{warning}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-5 rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_74%,transparent)] p-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+                Core Content
+              </p>
+              <div className="mt-4 space-y-5">
+                <div>
+                  <label htmlFor="topicId" className={getLabelClassName(isMissingField('topicId'))}>
+                    Topic ID
+                  </label>
+                  <input
+                    id="topicId"
+                    value={draft.topicId}
+                    onChange={(event) => setDraftField('topicId', event.target.value)}
+                    className="search-input w-full"
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="enText" className={getLabelClassName(isMissingField('enText'))}>
+                      Question (ENG)
+                    </label>
+                    <textarea
+                      id="enText"
+                      value={draft.enText}
+                      onChange={(event) => setDraftField('enText', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="amText" className={getLabelClassName(isMissingField('amText'))}>
+                      Question (ARM)
+                    </label>
+                    <textarea
+                      id="amText"
+                      value={draft.amText}
+                      onChange={(event) => setDraftField('amText', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="enAnswer" className={getLabelClassName(isMissingField('enAnswer'))}>
+                      Answer (ENG)
+                    </label>
+                    <textarea
+                      id="enAnswer"
+                      value={draft.enAnswer}
+                      onChange={(event) => setDraftField('enAnswer', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="amAnswer" className={getLabelClassName(isMissingField('amAnswer'))}>
+                      Answer (ARM)
+                    </label>
+                    <textarea
+                      id="amAnswer"
+                      value={draft.amAnswer}
+                      onChange={(event) => setDraftField('amAnswer', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="enExplanation"
+                      className={getLabelClassName(isMissingField('enExplanation'))}
+                    >
+                      Explanation (ENG)
+                    </label>
+                    <textarea
+                      id="enExplanation"
+                      value={draft.enExplanation}
+                      onChange={(event) => setDraftField('enExplanation', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="amExplanation"
+                      className={getLabelClassName(isMissingField('amExplanation'))}
+                    >
+                      Explanation (ARM)
+                    </label>
+                    <textarea
+                      id="amExplanation"
+                      value={draft.amExplanation}
+                      onChange={(event) => setDraftField('amExplanation', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+                Lists
+              </p>
+              <div className="mt-4 space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="enPitfalls"
+                      className={getLabelClassName(isMissingField('enPitfalls'))}
+                    >
+                      Pitfalls (ENG, one per line)
+                    </label>
+                    <textarea
+                      id="enPitfalls"
+                      value={draft.enPitfallsText}
+                      onChange={(event) => setDraftField('enPitfallsText', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="amPitfalls"
+                      className={getLabelClassName(isMissingField('amPitfalls'))}
+                    >
+                      Pitfalls (ARM, one per line)
+                    </label>
+                    <textarea
+                      id="amPitfalls"
+                      value={draft.amPitfallsText}
+                      onChange={(event) => setDraftField('amPitfallsText', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="enFollowups"
+                      className={getLabelClassName(isMissingField('enFollowups'))}
+                    >
+                      Follow-ups (ENG, one per line)
+                    </label>
+                    <textarea
+                      id="enFollowups"
+                      value={draft.enFollowupsText}
+                      onChange={(event) => setDraftField('enFollowupsText', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="amFollowups"
+                      className={getLabelClassName(isMissingField('amFollowups'))}
+                    >
+                      Follow-ups (ARM, one per line)
+                    </label>
+                    <textarea
+                      id="amFollowups"
+                      value={draft.amFollowupsText}
+                      onChange={(event) => setDraftField('amFollowupsText', event.target.value)}
+                      className="search-input min-h-24 w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p className={getLabelClassName(isMissingField('examples'))}>Examples (required)</p>
+              <AdminExamplesEditor
+                examples={draft.examples}
+                onChange={(nextExamples) => setDraftField('examples', nextExamples)}
+              />
+            </div>
+
+            <div>
+              <p className="mb-1.5 text-sm text-[var(--text-2)]">Category tags</p>
+              <AdminTagEditor
+                tags={draft.tags}
+                onChange={(nextTags) => setDraftField('tags', nextTags)}
+              />
+            </div>
+
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+                Advanced
+              </p>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div>
+                  <label htmlFor="codeLanguage" className="mb-1.5 block text-sm text-[var(--text-2)]">
+                    Primary code language
+                  </label>
+                  <input
+                    id="codeLanguage"
+                    value={draft.codeLanguage}
+                    onChange={(event) => setDraftField('codeLanguage', event.target.value)}
+                    className="search-input w-full"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="codeSnippet" className="mb-1.5 block text-sm text-[var(--text-2)]">
+                    Primary code snippet
+                  </label>
+                  <textarea
+                    id="codeSnippet"
+                    value={draft.codeSnippet}
+                    onChange={(event) => setDraftField('codeSnippet', event.target.value)}
+                    className="search-input min-h-24 w-full font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={!validation.canSave || isSubmitting}
+            className="btn-primary px-4 py-2 text-sm font-semibold"
+          >
+            {isSubmitting ? 'Saving...' : 'Save Question'}
+          </button>
+        </div>
+      )}
     </form>
   );
 };
