@@ -1,26 +1,42 @@
-import React, { useState } from 'react';
+'use client';
+
 import { motion } from 'framer-motion';
+import { useUIStore } from '@/store/uiStore';
+import type { Language } from '@/types/interview';
+
+const options: Array<{ label: string; value: Language }> = [
+  { label: 'ARM', value: 'am' },
+  { label: 'ENG', value: 'en' },
+];
 
 const DualLanguageToggle = () => {
-  const [language, setLanguage] = useState('en');
+  const language = useUIStore((state) => state.language);
+  const setLanguage = useUIStore((state) => state.setLanguage);
 
   return (
-    <div className="relative flex w-40 h-10 bg-slate-background rounded-full p-1">
+    <div className="pill-control relative flex h-11 w-40 items-center gap-1 rounded-[14px] p-1">
       <motion.div
-        className="absolute top-1 left-1 w-1/2 h-8 bg-cobalt-blue rounded-full"
-        animate={{ x: language === 'en' ? 0 : '100%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="absolute inset-y-1 w-[calc(50%-4px)] rounded-[10px] border border-[color-mix(in_srgb,var(--burnt-peach)_56%,transparent)] bg-[linear-gradient(180deg,var(--soft-peach),var(--light-caramel))] shadow-[0_8px_18px_color-mix(in_srgb,var(--burnt-peach)_34%,transparent)]"
+        animate={{ x: language === 'en' ? '100%' : '0%' }}
+        transition={{ duration: 0.26, ease: [0.2, 0.84, 0.24, 1] }}
       />
-      <button
-        onClick={() => setLanguage('am')}
-        className={`relative z-10 w-1/2 h-full rounded-full text-sm font-medium ${language === 'am' ? 'text-white' : 'text-white/50'}`}>
-        ARM
-      </button>
-      <button
-        onClick={() => setLanguage('en')}
-        className={`relative z-10 w-1/2 h-full rounded-full text-sm font-medium ${language === 'en' ? 'text-white' : 'text-white/50'}`}>
-        ENG
-      </button>
+
+      {options.map((option) => {
+        const selected = language === option.value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            className={`relative z-10 flex-1 rounded-lg text-xs font-semibold tracking-[0.12em] transition-colors duration-300 ${
+              selected ? 'text-[var(--pitch-black)]' : 'text-[var(--text-2)]'
+            }`}
+            onClick={() => setLanguage(option.value)}
+            aria-pressed={selected}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 };

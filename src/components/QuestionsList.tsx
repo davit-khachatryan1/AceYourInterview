@@ -1,75 +1,81 @@
-import React, { useEffect, useState } from 'react';
-import { useQuestions } from '@/hooks/useQuestions';
-import { doc, deleteDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import EditQuestionForm from './EditQuestionForm';
+'use client';
 
-interface Question {
-  id: string;
-  question: string;
-  answer: string;
-  codeSnippet?: string;
-  topic: string;
-}
+import { deleteDoc, doc } from 'firebase/firestore';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import EditQuestionForm from '@/components/EditQuestionForm';
+import { useQuestions } from '@/hooks/useQuestions';
+import { db } from '@/lib/firebase';
+import { useUIStore } from '@/store/uiStore';
+import type { QuestionRecord } from '@/types/interview';
 
 const QuestionsList = () => {
-  const { questions, loading, error, fetchQuestions } = useQuestions();
-  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
-
-  useEffect(() => {
-    fetchQuestions();
-  }, [fetchQuestions]);
+  const { questions, loading, error } = useQuestions(undefined, { enableDemoFallback: false });
+  const language = useUIStore((state) => state.language);
+  const [editingQuestion, setEditingQuestion] = useState<QuestionRecord | null>(null);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this question?')) {
-      try {
-        await deleteDoc(doc(db, 'questions', id));
-        fetchQuestions(); // Refresh the list
-      } catch (error) {
-        console.error("Error deleting document: ", error);
-      }
+    if (!window.confirm('Delete this question?')) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'questions', id));
+    } catch (deleteError) {
+      window.alert((deleteError as Error).message);
     }
   };
 
-  const handleEdit = (question: Question) => {
-    setEditingQuestion(question);
-  };
+  if (loading) {
+    return <p className="text-sm text-[var(--text-2)]">Loading questions...</p>;
+  }
 
-  const handleUpdate = () => {
-    setEditingQuestion(null);
-    fetchQuestions();
-  };
-
-  const handleCancelEdit = () => {
-    setEditingQuestion(null);
-  };
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (error) {
+    return <p className="text-sm text-[var(--text-1)]">{error}</p>;
+  }
 
   return (
-    <div className="space-y-4">
-      {questions.map((q) => (
-        <div key={q.id} className="bg-white/10 p-4 rounded-lg flex justify-between items-center">
-          <div>
-            <h4 className="font-semibold">{q.question}</h4>
-            <p className="text-sm text-white/60">{q.topic}</p>
-          </div>
-          <div className="space-x-2">
-            <button onClick={() => handleEdit(q)} className="text-sm text-cobalt-blue hover:underline">Edit</button>
-            <button onClick={() => handleDelete(q.id)} className="text-sm text-red-500 hover:underline">Delete</button>
-          </div>
-        </div>
-      ))}
+    <>
+      <div className="space-y-2">
+        {questions.map((question) => {
+          const source = question.record;
+          const primaryText = language === 'en' ? source.en_text ?? source.question : source.am_text ?? source.question;
+
+          return (
+            <div key={question.id} className="interactive-row p-3">
+              <p className="text-sm font-semibold text-[var(--text-1)]">{primaryText || 'Untitled question'}</p>
+              <p className="mt-1 text-xs text-[var(--text-3)]">{question.topicLabel}</p>
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary px-2.5 py-1.5 text-xs"
+                  onClick={() => setEditingQuestion(question.record)}
+                >
+                  <Pencil size={12} />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="btn-ghost border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--text-1)] hover:border-[color-mix(in_srgb,var(--burnt-tangerine)_36%,var(--border))] hover:text-[color-mix(in_srgb,var(--burnt-tangerine)_92%,white)]"
+                  onClick={() => handleDelete(question.id)}
+                >
+                  <Trash2 size={12} />
+                  Delete
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {editingQuestion && (
         <EditQuestionForm
           question={editingQuestion}
-          onUpdated={handleUpdate}
-          onCancel={handleCancelEdit}
+          onUpdated={() => setEditingQuestion(null)}
+          onCancel={() => setEditingQuestion(null)}
         />
       )}
-    </div>
+    </>
   );
 };
 

@@ -1,64 +1,94 @@
-import React, { useState } from 'react';
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from '@/lib/firebase'; // Make sure app is exported from firebase.ts
+'use client';
+
+import { useState, type FormEvent } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { LogIn, ShieldCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
 
 const LoginPage = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (event: FormEvent) => {
+    event.preventDefault();
     setIsLoggingIn(true);
     setError(null);
-    const auth = getAuth(app);
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Redirect to admin page on successful login
-      window.location.href = '/admin';
-    } catch (error) {
-      setError((error as Error).message);
+      router.replace('/admin');
+    } catch (loginError) {
+      setError((loginError as Error).message);
     } finally {
       setIsLoggingIn(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-background flex items-center justify-center">
-      <div className="max-w-md w-full bg-white/10 p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-white text-center mb-6">Admin Login</h1>
-        <form onSubmit={handleLogin}>
-          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-white/80 mb-2">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-background border border-white/20 rounded-md p-2 text-white"
-            />
+    <div className="min-h-screen bg-[var(--bg)] px-4 py-10 md:px-6 md:py-14">
+      <div className="mx-auto grid w-full max-w-6xl gap-6 md:grid-cols-[1.2fr_1fr]">
+        <section className="panel-surface hidden p-8 md:block">
+          <div className="inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+            <ShieldCheck size={12} />
+            Restricted Access
           </div>
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-white/80 mb-2">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-background border border-white/20 rounded-md p-2 text-white"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isLoggingIn}
-            className="w-full bg-cobalt-blue text-white py-2 rounded-md hover:bg-opacity-90 transition-colors duration-200"
-          >
-            {isLoggingIn ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+          <h1 className="display-heading mt-4 text-5xl">AceYourInterview Admin</h1>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-[var(--text-2)]">
+            Sign in with an allowlisted account to manage bilingual questions, examples, and quality controls.
+          </p>
+        </section>
+
+        <section className="panel-surface p-6 md:p-7">
+          <h2 className="display-heading text-4xl">Sign In</h2>
+          <p className="mt-1 text-sm text-[var(--text-2)]">Only allowlisted admin accounts can enter.</p>
+
+          <form onSubmit={handleLogin} className="mt-6 space-y-4">
+            {error && (
+              <p className="rounded-xl border border-[color-mix(in_srgb,var(--burnt-tangerine)_45%,var(--border))] bg-[color-mix(in_srgb,var(--burnt-tangerine)_16%,transparent)] p-2.5 text-sm text-[var(--text-1)]">
+                {error}
+              </p>
+            )}
+
+            <div>
+              <label htmlFor="email" className="mb-1.5 block text-sm text-[var(--text-2)]">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="search-input w-full"
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="mb-1.5 block text-sm text-[var(--text-2)]">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="search-input w-full"
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            <button type="submit" disabled={isLoggingIn} className="btn-primary inline-flex w-full items-center justify-center gap-2 py-2.5 text-sm font-semibold">
+              <LogIn size={15} />
+              {isLoggingIn ? 'Signing in...' : 'Login'}
+            </button>
+          </form>
+        </section>
       </div>
     </div>
   );

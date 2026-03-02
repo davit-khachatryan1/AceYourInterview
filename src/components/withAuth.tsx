@@ -1,34 +1,60 @@
-import { useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { app } from '@/lib/firebase';
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+
+const getAllowlist = (): string[] => {
+  const raw = process.env.NEXT_PUBLIC_ADMIN_ALLOWLIST ?? '';
+  return raw
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+};
 
 const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
   const AuthComponent = (props: P) => {
+    const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
+    const allowlist = useMemo(() => getAllowlist(), []);
 
     useEffect(() => {
-      const auth = getAuth(app);
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          setUser(user);
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (!currentUser) {
+          router.replace('/login');
           setLoading(false);
-        } else {
-          router.push('/login');
+          return;
         }
+
+        const email = currentUser.email?.toLowerCase();
+        const isAllowed =
+          allowlist.length === 0 ? !!email : !!email && allowlist.includes(email);
+
+        if (!isAllowed) {
+          router.replace('/');
+          setLoading(false);
+          return;
+        }
+
+        setUser(currentUser);
+        setLoading(false);
       });
 
       return () => unsubscribe();
-    }, [router]);
+    }, [allowlist, router]);
 
     if (loading) {
-      return <p>Loading...</p>; // Or a proper loading spinner
+      return (
+        <div className="grid min-h-screen place-items-center bg-[var(--bg)] p-6">
+          <p className="panel-surface px-5 py-3 text-sm text-[var(--text-2)]">Loading admin session...</p>
+        </div>
+      );
     }
 
     if (!user) {
-      return null; // Render nothing while redirecting
+      return null;
     }
 
     return <WrappedComponent {...props} />;
