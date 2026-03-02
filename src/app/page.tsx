@@ -21,6 +21,44 @@ import { useUserSession } from '@/hooks/useUserSession';
 import { useUIStore } from '@/store/uiStore';
 import type { NormalizedQuestion } from '@/types/interview';
 
+const ProgressRing = ({ percentage }: { percentage: number }) => {
+  const size = 148;
+  const strokeWidth = 12;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
+        <defs>
+          <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#7c3aed" />
+            <stop offset="100%" stopColor="#ec4899" />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--surface-3)" strokeWidth={strokeWidth} />
+        <circle
+          cx={size / 2} cy={size / 2} r={radius} fill="none"
+          stroke="url(#ring-grad)" strokeWidth={strokeWidth}
+          strokeDasharray={circumference} strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)', filter: 'drop-shadow(0 0 6px rgba(124,58,237,0.55))' }}
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center justify-center">
+        <span
+          className="text-3xl font-black leading-none"
+          style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+        >
+          {percentage}%
+        </span>
+        <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-3)]">done</span>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const router = useRouter();
   const pathname = usePathname();
@@ -74,6 +112,13 @@ export default function Home() {
     { loading: session.loading, error: session.error },
     persistenceEnabled,
   );
+
+  const nextUnlearnedQuestion = useMemo(
+    () => filteredQuestions.find((q) => !learnedSet.has(q.id)) ?? null,
+    [filteredQuestions, learnedSet],
+  );
+
+  const remainingCount = completionState.totalCount - completionState.learnedCount;
 
   useEffect(() => {
     const syncFromLocation = () => {
@@ -342,7 +387,7 @@ export default function Home() {
                 <div className="flex flex-wrap items-center gap-2">
                   <DualLanguageToggle />
                   <ThemeToggle />
-                  <Link href={session.user ? '/admin' : '/login'} className="btn-secondary px-4 py-2 text-sm">
+                  <Link href={session.user ? '/admin' : '/login'} className="btn-primary px-4 py-2 text-sm">
                     {session.user ? 'Admin' : 'Sign In'}
                   </Link>
                 </div>
@@ -358,15 +403,15 @@ export default function Home() {
                         key={topic.id}
                         type="button"
                         onClick={() => setActiveTopicId(topic.id)}
-                        className="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-150"
+                        className="shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-150"
                         style={active ? {
-                          border: '1px solid rgba(124,58,237,0.45)',
-                          background: 'rgba(124,58,237,0.14)',
+                          border: '1px solid rgba(124,58,237,0.5)',
+                          background: 'rgba(124,58,237,0.16)',
                           color: '#c4b5fd',
-                          boxShadow: '0 0 12px rgba(124,58,237,0.2)',
+                          boxShadow: '0 0 16px rgba(124,58,237,0.22)',
                         } : {
                           border: '1px solid var(--border)',
-                          background: 'var(--surface-1)',
+                          background: 'var(--surface-2)',
                           color: 'var(--text-2)',
                         }}
                       >
@@ -394,94 +439,97 @@ export default function Home() {
 
             <section className="grid gap-6 xl:grid-cols-[1.7fr_1fr]">
               {/* ── Hero / Topic Banner ── */}
-              <div className="panel-surface relative overflow-hidden p-6 md:p-8">
-                {/* decorative gradient shimmer */}
-                <div className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] opacity-60"
-                  style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.08) 0%,rgba(236,72,153,0.04) 60%,transparent 100%)' }} />
-                <div className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full opacity-40"
-                  style={{ background: 'radial-gradient(circle,rgba(124,58,237,0.25) 0%,transparent 70%)', filter: 'blur(40px)' }} />
+              <div className="panel-surface relative overflow-hidden p-6 md:p-9">
+                {/* decorative orbs */}
+                <div className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] opacity-70"
+                  style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.09) 0%,rgba(236,72,153,0.04) 60%,transparent 100%)' }} />
+                <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full"
+                  style={{ background: 'radial-gradient(circle,rgba(124,58,237,0.28) 0%,transparent 70%)', filter: 'blur(44px)' }} />
+                <div className="pointer-events-none absolute -bottom-10 left-10 h-40 w-40 rounded-full opacity-50"
+                  style={{ background: 'radial-gradient(circle,rgba(236,72,153,0.2) 0%,transparent 70%)', filter: 'blur(32px)' }} />
 
                 <p className="relative text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-3)]">Current topic</p>
                 <h1
-                  className="display-heading relative mt-3 text-3xl md:text-5xl"
-                  style={{ background: 'linear-gradient(135deg,#f1f5f9 30%,#a78bfa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                  className="display-heading relative mt-2 text-4xl leading-[1.1] md:text-6xl"
+                  style={{ background: 'linear-gradient(135deg,#f1f5f9 20%,#a78bfa 70%,#f472b6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
                 >
                   {activeTopicLabel}
                 </h1>
-                <p className="relative mt-4 max-w-3xl text-sm leading-relaxed text-[var(--text-2)] md:text-base">
-                  Work through one topic at a time, open the full answer when needed, and keep the deck focused instead of jumping across sections.
+                <p className="relative mt-4 max-w-xl text-sm leading-relaxed text-[var(--text-2)] md:text-base">
+                  Work through one topic at a time — open each card, review the full answer, and mark it learned when you&apos;re ready.
                 </p>
 
+                {/* Stat strip */}
                 <div className="relative mt-5 flex flex-wrap items-center gap-2">
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold"
+                    style={{ borderColor: 'rgba(124,58,237,0.3)', background: 'rgba(124,58,237,0.1)', color: '#c4b5fd' }}
+                  >
+                    📚 {filteredQuestions.length} questions
+                  </span>
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold"
+                    style={{ borderColor: 'rgba(236,72,153,0.25)', background: 'rgba(236,72,153,0.08)', color: '#f9a8d4' }}
+                  >
+                    ⏳ {remainingCount} remaining
+                  </span>
                   <span className="chip-pill">{language === 'en' ? '🇺🇸 English' : '🇦🇲 Armenian'}</span>
-                  <span className="micro-badge">{filteredQuestions.length} questions</span>
                   {sourceMode === 'demo' && <span className="micro-badge">Demo</span>}
                 </div>
 
-                <div className="relative mt-6 flex flex-wrap items-center gap-3">
-                  <button type="button" onClick={() => setSearchOpen(true)} className="btn-primary px-5 py-2.5 text-sm">
+                {/* CTA row */}
+                <div className="relative mt-7 flex flex-wrap items-center gap-3">
+                  <button type="button" onClick={() => setSearchOpen(true)} className="btn-primary px-6 py-3 text-sm">
+                    <Search size={15} />
                     Open Search
-                    <ArrowRight size={15} />
                   </button>
-                  <p className="text-sm text-[var(--text-3)]">
-                    Review answers, examples, pitfalls & follow-ups.
-                  </p>
+                  {nextUnlearnedQuestion && (
+                    <button
+                      type="button"
+                      onClick={() => openQuestionModal(nextUnlearnedQuestion)}
+                      className="btn-secondary px-6 py-3 text-sm"
+                    >
+                      Next Question
+                      <ArrowRight size={15} />
+                    </button>
+                  )}
                 </div>
               </div>
 
               {/* ── Study Progress Card ── */}
-              <div className="panel-surface relative overflow-hidden p-6">
-                <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full opacity-30"
-                  style={{ background: 'radial-gradient(circle,rgba(236,72,153,0.3) 0%,transparent 70%)', filter: 'blur(30px)' }} />
+              <div className="panel-surface relative flex flex-col items-center justify-center overflow-hidden p-6 md:p-8">
+                <div className="pointer-events-none absolute -bottom-12 -right-12 h-48 w-48 rounded-full opacity-40"
+                  style={{ background: 'radial-gradient(circle,rgba(236,72,153,0.3) 0%,transparent 70%)', filter: 'blur(36px)' }} />
+                <div className="pointer-events-none absolute -left-8 -top-8 h-36 w-36 rounded-full opacity-30"
+                  style={{ background: 'radial-gradient(circle,rgba(124,58,237,0.25) 0%,transparent 70%)', filter: 'blur(28px)' }} />
 
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">Study progress</p>
-                <div className="mt-4 space-y-4">
-                  <div className="flex items-end justify-between gap-4">
-                    <div>
-                      <p
-                        className="text-5xl font-black tracking-[-0.05em]"
-                        style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                      >
-                        {completionState.percentage}%
-                      </p>
-                      <p className="mt-1 text-xs text-[var(--text-3)]">Completion in topic</p>
-                    </div>
-                    <div className="text-right">
-                      <p
-                        className="text-2xl font-black"
-                        style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                      >
-                        {completionState.learnedCount}
-                      </p>
-                      <p className="text-xs text-[var(--text-3)]">learned</p>
-                    </div>
+                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">Study progress</p>
+
+                <ProgressRing percentage={completionState.percentage} />
+
+                {/* 3-stat row below ring */}
+                <div className="mt-6 grid w-full grid-cols-3 gap-3">
+                  <div className="flex flex-col items-center rounded-2xl border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.07)] p-3">
+                    <p
+                      className="text-2xl font-black leading-none"
+                      style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                    >
+                      {completionState.learnedCount}
+                    </p>
+                    <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-3)]">Learned</p>
                   </div>
-
-                  {/* gradient glow progress bar */}
-                  <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${Math.max(completionState.percentage, completionState.totalCount > 0 ? 2 : 0)}%`,
-                        background: 'linear-gradient(90deg,#7c3aed,#ec4899)',
-                        boxShadow: completionState.percentage > 0 ? '0 0 10px rgba(124,58,237,0.6)' : 'none',
-                      }}
-                    />
+                  <div className="flex flex-col items-center rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+                    <p className="text-2xl font-black leading-none text-[var(--text-1)]">{completionState.totalCount}</p>
+                    <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-3)]">Total</p>
                   </div>
-
-                  {/* mini stat chips */}
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.07)] p-4">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-3)]">✓ Learned</p>
-                      <p className="mt-2 text-xl font-black text-[var(--text-1)]">
-                        {completionState.learnedCount}
-                        <span className="text-sm font-semibold text-[var(--text-3)]">/{completionState.totalCount}</span>
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-[rgba(236,72,153,0.2)] bg-[rgba(236,72,153,0.06)] p-4">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-3)]">📚 Ready</p>
-                      <p className="mt-2 text-xl font-black text-[var(--text-1)]">{filteredQuestions.length}</p>
-                    </div>
+                  <div className="flex flex-col items-center rounded-2xl border border-[rgba(236,72,153,0.2)] bg-[rgba(236,72,153,0.06)] p-3">
+                    <p
+                      className="text-2xl font-black leading-none"
+                      style={{ background: 'linear-gradient(135deg,#f472b6,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                    >
+                      {remainingCount}
+                    </p>
+                    <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-3)]">Left</p>
                   </div>
                 </div>
               </div>

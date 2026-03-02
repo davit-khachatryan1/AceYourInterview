@@ -1,7 +1,7 @@
 'use client';
 
-import { ArrowUpRight, MoreHorizontal } from 'lucide-react';
-import type { KeyboardEvent, MouseEvent } from 'react';
+import { ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import type { MouseEvent, KeyboardEvent } from 'react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -36,7 +36,7 @@ const InterviewCard = ({ question, learned, onLearnedChange, onOpen }: Interview
           onOpen();
         }
       }}
-      className="group relative flex h-full cursor-pointer flex-col overflow-hidden"
+      className="group relative flex min-h-[300px] cursor-pointer flex-col overflow-hidden"
       aria-label={`Open details for ${question.questionText}`}
     >
       {/* Gradient accent line at top, revealed on hover */}
@@ -45,31 +45,40 @@ const InterviewCard = ({ question, learned, onLearnedChange, onOpen }: Interview
         style={{ background: 'linear-gradient(90deg, #7c3aed, #ec4899)' }}
       />
 
+      {/* Learned glow overlay */}
+      {learned && (
+        <span
+          className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-30"
+          style={{ background: 'radial-gradient(ellipse at top left,rgba(124,58,237,0.18) 0%,transparent 60%)' }}
+        />
+      )}
+
+      {/* Top row: topic badge + learned badge */}
       <div className="mb-4 flex items-start justify-between gap-3">
         <Badge variant="topic">{question.topicLabel}</Badge>
-        <button
-          type="button"
-          className="icon-button h-9 w-9"
-          onClick={(event) => {
-            stopCardOpen(event);
-            onOpen();
-          }}
-          aria-label="Open question actions"
-        >
-          <MoreHorizontal size={15} />
-        </button>
+        {learned && (
+          <span
+            className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold"
+            style={{ borderColor: 'rgba(124,58,237,0.35)', background: 'rgba(124,58,237,0.12)', color: '#a78bfa' }}
+          >
+            <CheckCircle2 size={11} />
+            Learned
+          </span>
+        )}
       </div>
 
+      {/* Question text — much larger */}
       <div className="flex-1">
-        <h3 className="text-base font-semibold tracking-[-0.02em] text-[var(--text-1)] md:text-lg">
+        <h3 className="text-lg font-bold leading-snug tracking-[-0.02em] text-[var(--text-1)] md:text-xl">
           {question.questionText}
         </h3>
 
-        <p className="mt-3 max-h-[4.5rem] overflow-hidden text-sm leading-relaxed text-[var(--text-2)]">
+        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[var(--text-2)]">
           {preview}
         </p>
       </div>
 
+      {/* Tags */}
       <div className="mt-5 flex flex-wrap gap-2">
         {question.tags.slice(0, 3).map((tag) => (
           <Badge key={`${question.id}-${tag}`} variant="tag">
@@ -78,10 +87,13 @@ const InterviewCard = ({ question, learned, onLearnedChange, onOpen }: Interview
         ))}
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
-        <Button type="button" variant="primary" size="sm" onClick={onOpen} className="min-w-[6.5rem]">
-          Start
-          <ArrowUpRight size={14} />
+      {/* Bottom action row */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-5">
+        <Button type="button" variant="primary" size="sm" onClick={onOpen}
+          className="min-w-[8rem] px-5 py-2.5 text-sm"
+        >
+          Study Now
+          <ArrowUpRight size={15} />
         </Button>
 
         <label
@@ -95,7 +107,10 @@ const InterviewCard = ({ question, learned, onLearnedChange, onOpen }: Interview
             onChange={(event) => onLearnedChange(event.target.checked)}
             className="h-4 w-4 rounded border border-[var(--border)] bg-transparent accent-[#7c3aed]"
           />
-          {learned ? <span className="font-semibold text-[var(--brand-primary)]">Learned ✓</span> : 'Mark as learned'}
+          {learned
+            ? <span className="font-semibold text-[var(--brand-primary)]">Marked ✓</span>
+            : <span className="text-[var(--text-3)]">Mark as learned</span>
+          }
         </label>
       </div>
     </Card>

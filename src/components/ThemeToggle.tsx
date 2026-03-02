@@ -14,7 +14,13 @@ const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="pill-control inline-flex h-10 items-center gap-1 rounded-[12px] p-1">
+    <div
+      className="relative inline-flex h-12 items-center gap-0.5 rounded-[14px] p-1"
+      style={{
+        background: 'var(--surface-2)',
+        border: '1px solid var(--border)',
+      }}
+    >
       {options.map((option) => {
         const active = theme === option.value;
         const Icon = option.icon;
@@ -24,16 +30,21 @@ const ThemeToggle = () => {
             key={option.value}
             type="button"
             onClick={() => setTheme(option.value)}
-            className={`inline-flex h-full items-center gap-1 rounded-[10px] px-2.5 py-1.5 text-xs font-semibold transition-all ${
-              active
-                ? 'border border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_12%,var(--surface-1))] text-[var(--brand-primary)]'
-                : 'text-[var(--text-2)] hover:bg-[var(--surface-1)] hover:text-[var(--text-1)]'
-            }`}
+            className="relative inline-flex h-full items-center gap-1.5 rounded-[11px] px-3 py-2 text-xs font-semibold transition-all duration-200"
+            style={active ? {
+              background: 'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(236,72,153,0.12))',
+              border: '1px solid rgba(124,58,237,0.35)',
+              color: '#c4b5fd',
+              boxShadow: '0 0 12px rgba(124,58,237,0.2)',
+            } : {
+              border: '1px solid transparent',
+              color: 'var(--text-2)',
+            }}
             aria-pressed={active}
             aria-label={`Switch to ${option.label} theme`}
           >
-            <Icon size={13} />
-            <span className="hidden xl:inline">{option.label}</span>
+            <Icon size={14} />
+            <span className="hidden md:inline">{option.label}</span>
           </button>
         );
       })}
