@@ -30,8 +30,8 @@ const topicOverrideOptions = ['react', 'javascript'] as const;
 
 const getLabelClassName = (highlight: boolean): string =>
   highlight
-    ? 'mb-1.5 block text-sm font-medium text-[var(--brand-secondary)]'
-    : 'mb-1.5 block text-sm font-medium text-[var(--text-2)]';
+    ? 'mb-1.5 block text-sm font-semibold text-[var(--brand-secondary)]'
+    : 'mb-1.5 block text-sm font-semibold text-[var(--text-1)]';
 
 const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
   const [rawInput, setRawInput] = useState('');
@@ -157,7 +157,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
         </p>
       )}
 
-      <div className="rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-2)] p-4">
+      <div className="rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-2)] p-4 md:p-5">
         <div className="mb-5 grid gap-2 sm:grid-cols-4">
           {['Paste', 'Parse', 'Review', 'Save'].map((step, index) => {
             const stepNumber = index + 1;
@@ -169,7 +169,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
                 key={step}
                 className={`rounded-2xl border px-3 py-3 ${
                   complete || active
-                    ? 'border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_8%,var(--surface-1))]'
+                    ? 'border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_8%,var(--surface-3))]'
                     : 'border-[var(--border)] bg-[var(--surface-1)]'
                 }`}
               >
@@ -179,8 +179,8 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
                       complete
                         ? 'bg-[var(--brand-primary)] text-white'
                         : active
-                          ? 'bg-[color-mix(in_srgb,var(--brand-primary)_14%,var(--surface-1))] text-[var(--brand-primary)]'
-                          : 'bg-[var(--surface-2)] text-[var(--text-3)]'
+                          ? 'bg-[color-mix(in_srgb,var(--brand-primary)_14%,var(--surface-3))] text-[var(--brand-primary)]'
+                          : 'bg-[var(--surface-1)] text-[var(--text-3)]'
                     }`}
                   >
                     {stepNumber}
@@ -193,91 +193,93 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
         </div>
 
         <div className="space-y-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
-            Step 1
-          </p>
-          <h3 className="mt-2 text-lg font-semibold text-[var(--text-1)]">Paste Full Question Content</h3>
-          <p className="mt-1 text-sm text-[var(--text-2)]">
-            Paste one mixed block of English, Armenian, examples, tags, and code. AI will sort it into the existing question fields for review.
-          </p>
-        </div>
-
-        <div>
-          <label htmlFor="provider" className="mb-1.5 block text-sm text-[var(--text-2)]">
-            AI provider
-          </label>
-          <select
-            id="provider"
-            value={provider}
-            onChange={(event) => setProvider(event.target.value as AdminAiProvider)}
-            className="search-input w-full"
-          >
-            {adminAiProviderOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="topicOverride" className="mb-1.5 block text-sm text-[var(--text-2)]">
-            Topic ID override (optional)
-          </label>
-          <select
-            id="topicOverride"
-            value={topicOverride}
-            onChange={(event) => setTopicOverride(event.target.value)}
-            className="search-input w-full"
-          >
-            <option value="">Auto-detect from content</option>
-            {topicOverrideOptions.map((topicId) => (
-              <option key={topicId} value={topicId}>
-                {topicId}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="rawInput" className="mb-1.5 block text-sm text-[var(--text-2)]">
-            Mixed source text
-          </label>
-          <textarea
-            id="rawInput"
-            value={rawInput}
-            onChange={(event) => setRawInput(event.target.value)}
-            className="search-input min-h-56 w-full"
-            placeholder="Paste the full mixed question draft here..."
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={handleParse}
-            disabled={parseStatus === 'parsing'}
-            className="btn-secondary px-4 py-2 text-sm font-semibold"
-          >
-            {parseStatus === 'parsing'
-              ? 'Parsing...'
-              : hasParsedDraft
-                ? 'Parse Again'
-                : 'Parse with AI'}
-          </button>
-          {hasParsedDraft && (
-            <p className="self-center text-sm text-[var(--text-2)]">
-              Parsed draft ready. Review the structured fields below before saving.
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
+              Step 1
             </p>
-          )}
-        </div>
+            <h3 className="mt-2 text-lg font-semibold text-[var(--text-1)]">Paste Full Question Content</h3>
+            <p className="mt-1 text-sm text-[var(--text-2)]">
+              Paste one mixed block of English, Armenian, examples, tags, and code. AI will sort it into the existing question fields for review.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="provider" className="mb-1.5 block text-sm font-semibold text-[var(--text-1)]">
+                AI provider
+              </label>
+              <select
+                id="provider"
+                value={provider}
+                onChange={(event) => setProvider(event.target.value as AdminAiProvider)}
+                className="search-input w-full"
+              >
+                {adminAiProviderOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="topicOverride" className="mb-1.5 block text-sm font-semibold text-[var(--text-1)]">
+                Topic ID override (optional)
+              </label>
+              <select
+                id="topicOverride"
+                value={topicOverride}
+                onChange={(event) => setTopicOverride(event.target.value)}
+                className="search-input w-full"
+              >
+                <option value="">Auto-detect from content</option>
+                {topicOverrideOptions.map((topicId) => (
+                  <option key={topicId} value={topicId}>
+                    {topicId}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="rawInput" className="mb-1.5 block text-sm font-semibold text-[var(--text-1)]">
+              Mixed source text
+            </label>
+            <textarea
+              id="rawInput"
+              value={rawInput}
+              onChange={(event) => setRawInput(event.target.value)}
+              className="search-input min-h-56 w-full"
+              placeholder="Paste the full mixed question draft here..."
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleParse}
+              disabled={parseStatus === 'parsing'}
+              className="btn-primary px-4 py-2 text-sm font-semibold"
+            >
+              {parseStatus === 'parsing'
+                ? 'Parsing...'
+                : hasParsedDraft
+                  ? 'Parse Again'
+                  : 'Parse with AI'}
+            </button>
+            {hasParsedDraft && (
+              <p className="self-center text-sm text-[var(--text-2)]">
+                Parsed draft ready. Review the structured fields below before saving.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
       {hasParsedDraft && (
         <div className="space-y-5">
-          <div className="space-y-4 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-2)] p-4">
+          <div className="space-y-4 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-2)] p-4 md:p-5">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
                 Step 2
@@ -289,7 +291,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
                   Missing required fields
                 </p>
@@ -304,7 +306,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
                 )}
               </div>
 
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-3)] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
                   Parser warnings
                 </p>
@@ -321,7 +323,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
             </div>
           </div>
 
-          <div className="space-y-5 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-1)] p-4 md:p-5">
+          <div className="space-y-5 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-2)] p-4 md:p-5">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
                 Core Content
@@ -500,7 +502,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
             </div>
 
             <div>
-              <p className="mb-1.5 text-sm text-[var(--text-2)]">Category tags</p>
+              <p className="mb-1.5 text-sm font-semibold text-[var(--text-1)]">Category tags</p>
               <AdminTagEditor
                 tags={draft.tags}
                 onChange={(nextTags) => setDraftField('tags', nextTags)}
@@ -513,7 +515,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
               </p>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div>
-                  <label htmlFor="codeLanguage" className="mb-1.5 block text-sm text-[var(--text-2)]">
+                  <label htmlFor="codeLanguage" className="mb-1.5 block text-sm font-semibold text-[var(--text-1)]">
                     Primary code language
                   </label>
                   <input
@@ -524,7 +526,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="codeSnippet" className="mb-1.5 block text-sm text-[var(--text-2)]">
+                  <label htmlFor="codeSnippet" className="mb-1.5 block text-sm font-semibold text-[var(--text-1)]">
                     Primary code snippet
                   </label>
                   <textarea
@@ -538,13 +540,21 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={!validation.canSave || isSubmitting}
-            className="btn-primary px-4 py-2 text-sm font-semibold"
-          >
-            {isSubmitting ? 'Saving...' : 'Save Question'}
-          </button>
+          <div className="flex flex-col gap-3 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-2)] p-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-[var(--text-1)]">Final step</p>
+              <p className="mt-1 text-sm text-[var(--text-2)]">
+                Confirm the structured fields, then save the question to Firestore.
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={!validation.canSave || isSubmitting}
+              className="btn-primary px-4 py-2 text-sm font-semibold"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Question'}
+            </button>
+          </div>
         </div>
       )}
     </form>

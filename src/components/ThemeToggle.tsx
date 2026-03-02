@@ -14,7 +14,7 @@ const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="pill-control inline-flex items-center gap-1 rounded-[14px] p-1">
+    <div className="pill-control inline-flex h-10 items-center gap-1 rounded-[12px] p-1">
       {options.map((option) => {
         const active = theme === option.value;
         const Icon = option.icon;
@@ -24,7 +24,7 @@ const ThemeToggle = () => {
             key={option.value}
             type="button"
             onClick={() => setTheme(option.value)}
-            className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all ${
+            className={`inline-flex h-full items-center gap-1 rounded-[10px] px-2.5 py-1.5 text-xs font-semibold transition-all ${
               active
                 ? 'border border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_12%,var(--surface-1))] text-[var(--brand-primary)]'
                 : 'text-[var(--text-2)] hover:bg-[var(--surface-1)] hover:text-[var(--text-1)]'
@@ -33,7 +33,7 @@ const ThemeToggle = () => {
             aria-label={`Switch to ${option.label} theme`}
           >
             <Icon size={13} />
-            <span className="hidden md:inline">{option.label}</span>
+            <span className="hidden xl:inline">{option.label}</span>
           </button>
         );
       })}

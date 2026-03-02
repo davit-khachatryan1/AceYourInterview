@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, Lock, ShieldCheck, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -32,46 +32,148 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] px-4 py-6 md:px-6 md:py-8">
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="hidden overflow-hidden rounded-[24px] border border-[var(--border)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--brand-primary)_10%,var(--surface-1)),color-mix(in_srgb,var(--surface-2)_86%,transparent))] p-8 shadow-[var(--shadow-soft)] lg:flex lg:flex-col lg:justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-3 py-1 text-xs font-medium text-[var(--text-2)]">
-              <ShieldCheck size={14} />
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-1)]">
+      <div className="grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
+
+        {/* ── Left hero panel ── */}
+        <section className="relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between">
+          {/* Orb glows */}
+          <div
+            className="pointer-events-none absolute -right-24 -top-24 h-[480px] w-[480px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.28) 0%, transparent 70%)', filter: 'blur(72px)' }}
+          />
+          <div
+            className="pointer-events-none absolute -bottom-16 left-0 h-80 w-80 rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.22) 0%, transparent 70%)', filter: 'blur(60px)' }}
+          />
+          <div
+            className="pointer-events-none absolute left-1/3 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)', filter: 'blur(50px)' }}
+          />
+
+          {/* Subtle gradient overlay on the panel */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: 'linear-gradient(160deg, rgba(124,58,237,0.07) 0%, rgba(236,72,153,0.04) 50%, transparent 100%)' }}
+          />
+
+          {/* Border on the right */}
+          <div className="absolute inset-y-0 right-0 w-px bg-[var(--border)]" />
+
+          {/* Content */}
+          <div className="relative px-8 py-10 xl:px-12">
+            {/* Brand badge */}
+            <div className="mb-10 inline-flex items-center gap-2.5">
+              <div
+                className="grid h-9 w-9 place-items-center rounded-xl text-white"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#ec4899)', boxShadow: '0 0 18px rgba(124,58,237,0.5)' }}
+              >
+                <BookOpen size={16} />
+              </div>
+              <span
+                className="text-sm font-bold"
+                style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+              >
+                AceYourInterview
+              </span>
+            </div>
+
+            {/* Status pill */}
+            <div
+              className="mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
+              style={{ borderColor: 'rgba(167,139,250,0.3)', background: 'rgba(124,58,237,0.1)', color: '#a78bfa' }}
+            >
+              <ShieldCheck size={12} />
               Admin workspace access
             </div>
-            <h1 className="display-heading mt-6 max-w-xl text-5xl text-[var(--text-1)]">
-              Manage interview content in a cleaner editorial workspace.
+
+            {/* Hero heading */}
+            <h1 className="display-heading max-w-xl text-5xl">
+              <span style={{ background: 'linear-gradient(135deg,#f1f5f9 20%,#a78bfa 70%,#f472b6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Keep the interview library accurate, structured, and easy to maintain.
+              </span>
             </h1>
+
             <p className="mt-5 max-w-lg text-base leading-relaxed text-[var(--text-2)]">
-              Sign in to review question quality, update bilingual explanations, and maintain the interview library used by learners.
+              Sign in to review bilingual content, parse mixed drafts into structured fields, and update the question library without changing the learner-facing flow.
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-1)] p-5">
-              <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Secure access</p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--text-2)]">
-                Only allowlisted admin accounts can enter the content workspace.
+          {/* Bottom info cards */}
+          <div className="relative grid gap-4 px-8 pb-10 md:grid-cols-2 xl:px-12">
+            <div
+              className="rounded-[20px] border p-5"
+              style={{ borderColor: 'rgba(124,58,237,0.25)', background: 'rgba(124,58,237,0.08)' }}
+            >
+              <div
+                className="mb-3 grid h-9 w-9 place-items-center rounded-xl"
+                style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.25)' }}
+              >
+                <Lock size={15} style={{ color: '#a78bfa' }} />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: '#a78bfa' }}>Protected access</p>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--text-2)]">
+                Only authenticated admin accounts can enter the content workspace.
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-1)] p-5">
-              <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Fast workflow</p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--text-2)]">
-                Parse mixed drafts, review structured output, and publish updates without changing the learner experience.
+
+            <div
+              className="rounded-[20px] border p-5"
+              style={{ borderColor: 'rgba(236,72,153,0.22)', background: 'rgba(236,72,153,0.07)' }}
+            >
+              <div
+                className="mb-3 grid h-9 w-9 place-items-center rounded-xl"
+                style={{ background: 'rgba(236,72,153,0.12)', border: '1px solid rgba(236,72,153,0.22)' }}
+              >
+                <Zap size={15} style={{ color: '#f472b6' }} />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: '#f472b6' }}>Publishing flow</p>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--text-2)]">
+                Parse, review, and save structured questions while preserving the public site output.
               </p>
             </div>
           </div>
         </section>
 
-        <div className="flex items-center justify-center">
-          <Card className="w-full max-w-xl p-6 md:p-8">
+        {/* ── Right login form ── */}
+        <section className="relative flex items-center justify-center overflow-hidden px-4 py-8 md:px-6">
+          {/* Subtle pink orb behind form */}
+          <div
+            className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full opacity-40"
+            style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.2) 0%, transparent 70%)', filter: 'blur(50px)' }}
+          />
+
+          <Card className="relative w-full max-w-lg p-6 md:p-8">
+            {/* Gradient top accent line */}
+            <div
+              className="absolute inset-x-0 top-0 h-[2px] rounded-t-[var(--radius-xl)]"
+              style={{ background: 'linear-gradient(90deg,#7c3aed,#ec4899)' }}
+            />
+
             <div className="mb-6">
-              <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--text-3)]">
+              {/* Icon */}
+              <div
+                className="mb-4 grid h-12 w-12 place-items-center rounded-2xl text-white"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#ec4899)', boxShadow: '0 0 22px rgba(124,58,237,0.45)' }}
+              >
+                <ShieldCheck size={22} />
+              </div>
+
+              {/* Badge */}
+              <div
+                className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
+                style={{ borderColor: 'rgba(124,58,237,0.28)', background: 'rgba(124,58,237,0.09)', color: '#a78bfa' }}
+              >
+                <ShieldCheck size={12} />
                 Sign in
-              </p>
-              <h2 className="display-heading mt-2 text-3xl text-[var(--text-1)] md:text-4xl">
-                Access the admin panel
+              </div>
+
+              {/* Heading */}
+              <h2 className="display-heading text-3xl md:text-4xl">
+                Access the{' '}
+                <span style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  admin panel
+                </span>
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-[var(--text-2)]">
                 Use your Firebase email and password to continue to the question control center.
@@ -86,7 +188,7 @@ const LoginPage = () => {
               )}
 
               <div>
-                <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-[var(--text-2)]">
+                <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-[var(--text-1)]">
                   Email
                 </label>
                 <Input
@@ -100,7 +202,7 @@ const LoginPage = () => {
               </div>
 
               <div>
-                <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-[var(--text-2)]">
+                <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-[var(--text-1)]">
                   Password
                 </label>
                 <Input
@@ -119,7 +221,7 @@ const LoginPage = () => {
               </Button>
             </form>
           </Card>
-        </div>
+        </section>
       </div>
     </div>
   );

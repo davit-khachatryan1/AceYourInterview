@@ -14,7 +14,7 @@ const DualLanguageToggle = () => {
   const setLanguage = useUIStore((state) => state.setLanguage);
 
   return (
-    <div className="pill-control relative flex h-11 w-40 items-center gap-1 rounded-[14px] p-1">
+    <div className="pill-control relative flex h-10 w-32 items-center gap-1 rounded-[12px] p-1">
       <motion.div
         className="absolute inset-y-1 w-[calc(50%-4px)] rounded-[10px] border border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_12%,var(--surface-1))]"
         animate={{ x: language === 'en' ? '100%' : '0%' }}
@@ -27,7 +27,7 @@ const DualLanguageToggle = () => {
           <button
             key={option.value}
             type="button"
-            className={`relative z-10 flex-1 rounded-lg text-xs font-semibold tracking-[0.12em] transition-colors duration-300 ${
+            className={`relative z-10 flex h-full flex-1 items-center justify-center rounded-[10px] text-[11px] font-semibold tracking-[0.1em] transition-colors duration-300 ${
               selected ? 'text-[var(--brand-primary)]' : 'text-[var(--text-2)]'
             }`}
             onClick={() => setLanguage(option.value)}

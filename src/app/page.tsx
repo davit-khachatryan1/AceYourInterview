@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import confetti from 'canvas-confetti';
-import { Menu, Search } from 'lucide-react';
+import { ArrowRight, Menu, Search } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import AppStatusBanner from '@/components/AppStatusBanner';
 import DualLanguageToggle from '@/components/DualLanguageToggle';
@@ -27,8 +28,6 @@ export default function Home() {
   const language = useUIStore((state) => state.language);
   const activeTopicId = useUIStore((state) => state.activeTopicId);
   const setActiveTopicId = useUIStore((state) => state.setActiveTopicId);
-  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
-  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
   const searchOpen = useUIStore((state) => state.searchOpen);
   const setSearchOpen = useUIStore((state) => state.setSearchOpen);
 
@@ -272,6 +271,20 @@ export default function Home() {
   }, [error, isDemoFallback, loading, preferencesLoading, session.setupRequired, sourceMode]);
 
   const activeTopicLabel = topics.find((topic) => topic.id === activeTopicId)?.label ?? 'All Topics';
+  const quickTopics = useMemo(() => {
+    const maxQuickTopics = 6;
+    if (topics.length <= maxQuickTopics) {
+      return topics;
+    }
+
+    const initial = topics.slice(0, maxQuickTopics);
+    const activeTopic = topics.find((topic) => topic.id === activeTopicId);
+    if (!activeTopic || initial.some((topic) => topic.id === activeTopic.id)) {
+      return initial;
+    }
+
+    return [...initial.slice(0, maxQuickTopics - 1), activeTopic];
+  }, [activeTopicId, topics]);
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text-1)]">
@@ -281,150 +294,220 @@ export default function Home() {
         <Sidebar
           topics={topics}
           activeTopicId={activeTopicId}
+          completionPercentage={completionState.percentage}
           onTopicSelect={setActiveTopicId}
-          collapsed={sidebarCollapsed}
-          onToggleCollapsed={toggleSidebar}
+          onSearchOpen={() => setSearchOpen(true)}
           mobileOpen={mobileSidebarOpen}
           onMobileClose={() => setMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_92%,var(--bg-elevated))] backdrop-blur-sm">
-            <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 px-4 py-4 md:px-8 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center gap-3">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_96%,var(--surface-1))]">
+            <div className="space-y-3 px-4 py-4 md:px-6 xl:px-8 2xl:px-10">
+              <div className="flex flex-col gap-3 xl:grid xl:grid-cols-[minmax(0,18rem)_minmax(0,1fr)_auto] xl:items-center">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setMobileSidebarOpen(true)}
+                    className="icon-button md:hidden"
+                    aria-label="Open topics"
+                  >
+                    <Menu size={18} />
+                  </button>
+
+                  <div className="min-w-0">
+                    <p
+                      className="truncate text-sm font-black tracking-tight"
+                      style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                    >
+                      AceYourInterview
+                    </p>
+                    <p className="truncate text-xs text-[var(--text-3)]">
+                      {activeTopicId ? activeTopicLabel : 'Interview prep workspace'}
+                    </p>
+                  </div>
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => setMobileSidebarOpen(true)}
-                  className="icon-button md:hidden"
-                  aria-label="Open topics"
+                  onClick={() => setSearchOpen(true)}
+                  className="search-input flex w-full items-center gap-3 px-4 py-3 text-left text-sm"
+                  aria-label="Open search"
                 >
-                  <Menu size={18} />
+                  <Search size={17} className="text-[var(--text-3)]" />
+                  <span className="flex-1 text-[var(--text-2)]">Search questions, examples, and tags</span>
+                  <span className="kbd-badge">Cmd K</span>
                 </button>
 
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-3)]">
-                      Interview Workspace
-                    </p>
-                    {isDemoFallback && <span className="micro-badge">Demo Mode</span>}
-                  </div>
-                  <h1 className="display-heading mt-1 text-2xl md:text-3xl">AceYourInterview</h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  <DualLanguageToggle />
+                  <ThemeToggle />
+                  <Link href={session.user ? '/admin' : '/login'} className="btn-secondary px-4 py-2 text-sm">
+                    {session.user ? 'Admin' : 'Sign In'}
+                  </Link>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                className="search-input flex w-full max-w-2xl items-center gap-3 px-4 py-3 text-left text-sm lg:flex-1"
-                aria-label="Open search"
-              >
-                <Search size={17} className="text-[var(--text-3)]" />
-                <span className="flex-1 text-[var(--text-2)]">
-                  Search questions, examples, and tags
-                </span>
-                <span className="kbd-badge">Cmd K</span>
-              </button>
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
+                  {quickTopics.map((topic) => {
+                    const active = topic.id === activeTopicId;
 
-              <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                <DualLanguageToggle />
-                <ThemeToggle />
+                    return (
+                      <button
+                        key={topic.id}
+                        type="button"
+                        onClick={() => setActiveTopicId(topic.id)}
+                        className="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-150"
+                        style={active ? {
+                          border: '1px solid rgba(124,58,237,0.45)',
+                          background: 'rgba(124,58,237,0.14)',
+                          color: '#c4b5fd',
+                          boxShadow: '0 0 12px rgba(124,58,237,0.2)',
+                        } : {
+                          border: '1px solid var(--border)',
+                          background: 'var(--surface-1)',
+                          color: 'var(--text-2)',
+                        }}
+                      >
+                        {topic.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-3)]">
+                  <span className="micro-badge">{filteredQuestions.length} visible</span>
+                  <span className="micro-badge">{completionState.percentage}% complete</span>
+                  {isDemoFallback && <span className="micro-badge">Demo Mode</span>}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="mx-auto w-full max-w-[1280px] space-y-6 px-4 py-6 md:px-8 md:py-8">
+          <div className="space-y-6 px-4 py-6 md:px-6 md:py-8 xl:px-8 2xl:px-10">
             {status && (
-              <div className="mb-1">
+              <div>
                 <AppStatusBanner variant={status.variant} message={status.message} />
               </div>
             )}
 
-            <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-              <div className="panel-surface p-6 md:p-8">
-                <p className="text-sm font-medium text-[var(--text-3)]">Continue learning</p>
-                <h2 className="display-heading mt-2 text-3xl md:text-5xl">Focused prep, cleaner workflow.</h2>
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-2)] md:text-base">
-                  Stay on your active topic, open question details quickly, and keep momentum with a workspace designed for fast interview repetition.
+            <section className="grid gap-6 xl:grid-cols-[1.7fr_1fr]">
+              {/* ── Hero / Topic Banner ── */}
+              <div className="panel-surface relative overflow-hidden p-6 md:p-8">
+                {/* decorative gradient shimmer */}
+                <div className="pointer-events-none absolute inset-0 rounded-[var(--radius-xl)] opacity-60"
+                  style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.08) 0%,rgba(236,72,153,0.04) 60%,transparent 100%)' }} />
+                <div className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full opacity-40"
+                  style={{ background: 'radial-gradient(circle,rgba(124,58,237,0.25) 0%,transparent 70%)', filter: 'blur(40px)' }} />
+
+                <p className="relative text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-3)]">Current topic</p>
+                <h1
+                  className="display-heading relative mt-3 text-3xl md:text-5xl"
+                  style={{ background: 'linear-gradient(135deg,#f1f5f9 30%,#a78bfa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                >
+                  {activeTopicLabel}
+                </h1>
+                <p className="relative mt-4 max-w-3xl text-sm leading-relaxed text-[var(--text-2)] md:text-base">
+                  Work through one topic at a time, open the full answer when needed, and keep the deck focused instead of jumping across sections.
                 </p>
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <span className="chip-pill">{activeTopicLabel}</span>
-                  <span className="micro-badge">
-                    {language === 'en' ? 'English mode' : 'Armenian mode'}
-                  </span>
-                  <span className="micro-badge">{filteredQuestions.length} cards in view</span>
+
+                <div className="relative mt-5 flex flex-wrap items-center gap-2">
+                  <span className="chip-pill">{language === 'en' ? '🇺🇸 English' : '🇦🇲 Armenian'}</span>
+                  <span className="micro-badge">{filteredQuestions.length} questions</span>
+                  {sourceMode === 'demo' && <span className="micro-badge">Demo</span>}
+                </div>
+
+                <div className="relative mt-6 flex flex-wrap items-center gap-3">
+                  <button type="button" onClick={() => setSearchOpen(true)} className="btn-primary px-5 py-2.5 text-sm">
+                    Open Search
+                    <ArrowRight size={15} />
+                  </button>
+                  <p className="text-sm text-[var(--text-3)]">
+                    Review answers, examples, pitfalls & follow-ups.
+                  </p>
                 </div>
               </div>
 
-              <div className="panel-surface p-6">
-                <p className="text-sm font-medium text-[var(--text-3)]">Continue learning</p>
-                <div className="mt-4 space-y-5">
-                  <div>
-                    <div className="flex items-end justify-between gap-3">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Topic Progress</p>
-                        <p className="mt-1 text-4xl font-semibold tracking-[-0.03em]">
-                          {completionState.percentage}%
-                        </p>
-                      </div>
-                      <span className="text-sm font-medium text-[var(--text-2)]">
-                        {completionState.learnedCount}/{completionState.totalCount} learned
-                      </span>
+              {/* ── Study Progress Card ── */}
+              <div className="panel-surface relative overflow-hidden p-6">
+                <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full opacity-30"
+                  style={{ background: 'radial-gradient(circle,rgba(236,72,153,0.3) 0%,transparent 70%)', filter: 'blur(30px)' }} />
+
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">Study progress</p>
+                <div className="mt-4 space-y-4">
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p
+                        className="text-5xl font-black tracking-[-0.05em]"
+                        style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                      >
+                        {completionState.percentage}%
+                      </p>
+                      <p className="mt-1 text-xs text-[var(--text-3)]">Completion in topic</p>
                     </div>
-                    <div className="mt-4 h-2.5 rounded-full bg-[var(--surface-3)]">
-                      <div
-                        className="h-full rounded-full bg-[var(--brand-primary)]"
-                        style={{ width: `${completionState.percentage}%` }}
-                      />
+                    <div className="text-right">
+                      <p
+                        className="text-2xl font-black"
+                        style={{ background: 'linear-gradient(135deg,#a78bfa,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                      >
+                        {completionState.learnedCount}
+                      </p>
+                      <p className="text-xs text-[var(--text-3)]">learned</p>
                     </div>
                   </div>
 
+                  {/* gradient glow progress bar */}
+                  <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-3)]">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${Math.max(completionState.percentage, completionState.totalCount > 0 ? 2 : 0)}%`,
+                        background: 'linear-gradient(90deg,#7c3aed,#ec4899)',
+                        boxShadow: completionState.percentage > 0 ? '0 0 10px rgba(124,58,237,0.6)' : 'none',
+                      }}
+                    />
+                  </div>
+
+                  {/* mini stat chips */}
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-                      <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Active Topic</p>
-                      <p className="mt-2 text-lg font-semibold text-[var(--text-1)]">{activeTopicLabel}</p>
+                    <div className="rounded-2xl border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.07)] p-4">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-3)]">✓ Learned</p>
+                      <p className="mt-2 text-xl font-black text-[var(--text-1)]">
+                        {completionState.learnedCount}
+                        <span className="text-sm font-semibold text-[var(--text-3)]">/{completionState.totalCount}</span>
+                      </p>
                     </div>
-                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-                      <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Questions Ready</p>
-                      <p className="mt-2 text-lg font-semibold text-[var(--text-1)]">{filteredQuestions.length}</p>
+                    <div className="rounded-2xl border border-[rgba(236,72,153,0.2)] bg-[rgba(236,72,153,0.06)] p-4">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-3)]">📚 Ready</p>
+                      <p className="mt-2 text-xl font-black text-[var(--text-1)]">{filteredQuestions.length}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            <section className="grid gap-4 md:grid-cols-3">
-              <div className="panel-surface p-5">
-                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Progress</p>
-                <p className="mt-2 text-3xl font-semibold tracking-[-0.03em]">{completionState.percentage}%</p>
-                <div className="mt-4 h-1.5 rounded-full bg-[var(--surface-3)]">
-                  <div
-                    className="h-full rounded-full bg-[var(--brand-primary)]"
-                    style={{ width: `${completionState.percentage}%` }}
-                  />
+            <section className="flex flex-wrap items-end justify-between gap-3 pb-2">
+              <div className="flex items-center gap-3">
+                {/* gradient accent bar */}
+                <div className="h-8 w-1 rounded-full" style={{ background: 'linear-gradient(180deg,#7c3aed,#ec4899)', boxShadow: '0 0 8px rgba(124,58,237,0.5)' }} />
+                <div>
+                  <h2 className="display-heading text-[1.65rem]">
+                    <span style={{ background: 'linear-gradient(135deg,#f1f5f9,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                      Question Deck
+                    </span>
+                  </h2>
+                  <p className="mt-0.5 text-sm text-[var(--text-3)]">
+                    Open any card to review the answer, examples, and follow-ups.
+                  </p>
                 </div>
               </div>
-              <div className="panel-surface p-5">
-                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Learned Count</p>
-                <p className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
-                  {completionState.learnedCount}/{completionState.totalCount}
-                </p>
-                <p className="mt-3 text-sm text-[var(--text-2)]">Track completion without leaving the deck.</p>
-              </div>
-              <div className="panel-surface p-5">
-                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Current Topic</p>
-                <p className="mt-2 text-2xl font-semibold tracking-[-0.02em]">{activeTopicLabel}</p>
-                <p className="mt-3 text-sm text-[var(--text-2)]">Switch topics from the left rail at any time.</p>
-              </div>
-            </section>
-
-            <section className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h2 className="display-heading text-[1.65rem]">Question Deck</h2>
-                <p className="mt-1 text-sm text-[var(--text-2)]">
-                  Open a card to review the full answer, code parts, examples, and follow-ups.
-                </p>
-              </div>
-              <span className="micro-badge">{filteredQuestions.length} visible</span>
+              <span
+                className="rounded-full border px-3 py-1 text-xs font-bold"
+                style={{ borderColor: 'rgba(124,58,237,0.3)', background: 'rgba(124,58,237,0.1)', color: '#a78bfa' }}
+              >
+                {filteredQuestions.length} cards
+              </span>
             </section>
 
             {(loading || preferencesLoading) && (
@@ -436,8 +519,33 @@ export default function Home() {
             )}
 
             {!loading && filteredQuestions.length === 0 && (
-              <div className="panel-surface p-8 text-sm text-[var(--text-2)]">
-                No questions in this topic yet.
+              <div className="panel-surface relative overflow-hidden p-10 text-center">
+                {/* bg glow */}
+                <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 rounded-full opacity-40"
+                  style={{ background: 'radial-gradient(ellipse,rgba(124,58,237,0.2) 0%,transparent 70%)', filter: 'blur(30px)' }} />
+                {/* icon */}
+                <div
+                  className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl text-3xl"
+                  style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.15),rgba(236,72,153,0.1))', border: '1px solid rgba(124,58,237,0.25)' }}
+                >
+                  📭
+                </div>
+                <p
+                  className="text-xl font-black"
+                  style={{ background: 'linear-gradient(135deg,#f1f5f9,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                >
+                  No questions yet
+                </p>
+                <p className="mt-2 text-sm text-[var(--text-3)]">
+                  This topic has no questions loaded. Connect Firebase or add content via the admin panel.
+                </p>
+                <Link
+                  href="/login"
+                  className="btn-primary mt-6 inline-flex px-5 py-2.5 text-sm"
+                >
+                  Go to Admin
+                  <ArrowRight size={14} />
+                </Link>
               </div>
             )}
 

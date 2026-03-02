@@ -9,11 +9,11 @@ import withAuth from '@/components/withAuth';
 
 const AdminPage = () => {
   return (
-    <div className="min-h-screen bg-[var(--bg)] p-4 text-[var(--text-1)] md:p-8">
-      <div className="mx-auto w-full max-w-[1280px]">
+    <div className="min-h-screen bg-[var(--bg)] px-4 py-5 text-[var(--text-1)] md:px-6 md:py-8 xl:px-8">
+      <div className="mx-auto w-full max-w-[1440px]">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] pb-5">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-1)] px-3 py-1 text-xs font-medium text-[var(--text-2)]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-xs font-medium text-[var(--text-2)]">
               <ShieldCheck size={13} />
               Admin workspace
             </div>
@@ -30,24 +30,26 @@ const AdminPage = () => {
         </header>
 
         <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-          <Card as="section" className="p-5 md:p-6">
-            <div className="mb-4 flex items-center justify-between gap-3">
+          <Card as="section" className="overflow-hidden p-0">
+            <div className="border-b border-[var(--border)] px-5 py-4 md:px-6">
               <div>
                 <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Create Question</p>
                 <h2 className="mt-1 text-xl font-semibold text-[var(--text-1)]">AI-assisted authoring</h2>
               </div>
             </div>
-            <AddQuestionForm />
+            <div className="p-5 md:p-6">
+              <AddQuestionForm />
+            </div>
           </Card>
 
-          <Card as="section" className="p-5 md:p-6">
-            <div className="mb-4 flex items-center justify-between gap-3">
+          <Card as="section" className="overflow-hidden p-0">
+            <div className="border-b border-[var(--border)] px-5 py-4 md:px-6">
               <div>
                 <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Recent Questions</p>
                 <h2 className="mt-1 text-xl font-semibold text-[var(--text-1)]">Library index</h2>
               </div>
             </div>
-            <div className="max-h-[78vh] overflow-y-auto pr-1">
+            <div className="max-h-[78vh] overflow-y-auto p-5 md:p-6">
               <QuestionsList />
             </div>
           </Card>

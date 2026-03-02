@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AceYourInterview — Land Your Dream Job</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --purple: #7c3aed;
+      --purple-light: #a78bfa;
+      --pink: #ec4899;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --bg: #06060f;
+      --bg2: #0d0d1a;
+      --bg3: #111128;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --border: rgba(124,58,237,0.2);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 6%;
+      background: rgba(6,6,15,0.75);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.25s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      border-radius: 50px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 7rem 6% 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* gradient orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+    .orb-1 { width: 600px; height: 600px; background: rgba(124,58,237,0.35); top: -120px; right: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(236,72,153,0.25); bottom: -60px; left: 40%; }
+    .orb-3 { width: 350px; height: 350px; background: rgba(6,182,212,0.18); top: 30%; left: -80px; }
+
+    .hero-content { position: relative; z-index: 1; max-width: 680px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.35);
+      color: var(--purple-light);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 1rem;
+      border-radius: 50px;
+      margin-bottom: 1.8rem;
+      letter-spacing: 0.5px;
+    }
+    .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 5vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -2px;
+      margin-bottom: 1.4rem;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #a78bfa 0%, #ec4899 50%, #f97316 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 2.4rem;
+      max-width: 520px;
+    }
+
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: #fff;
+      border: none;
+      padding: 0.9rem 2rem;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 40px rgba(124,58,237,0.4);
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(124,58,237,0.6); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 0.9rem 2rem;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-ghost:hover { border-color: var(--purple-light); background: rgba(124,58,237,0.08); }
+
+    /* ── HERO VISUAL (floating card) ── */
+    .hero-visual {
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+      width: 420px;
+    }
+
+    .mock-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+      padding: 1.8rem;
+      backdrop-filter: blur(12px);
+      animation: float 5s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+    .mock-header { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1.4rem; }
+    .mock-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg,#7c3aed,#ec4899); display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem; }
+    .mock-name { font-size: 0.9rem; font-weight: 600; }
+    .mock-sub { font-size: 0.75rem; color: var(--muted); }
+
+    .mock-q {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+    .mock-question {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      line-height: 1.5;
+    }
+
+    .score-row { display: flex; gap: 0.7rem; margin-bottom: 1.2rem; }
+    .score-chip {
+      flex: 1;
+      background: rgba(124,58,237,0.12);
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: 10px;
+      padding: 0.6rem;
+      text-align: center;
+    }
+    .score-chip .val { font-size: 1.3rem; font-weight: 800; color: var(--purple-light); }
+    .score-chip .lbl { font-size: 0.65rem; color: var(--muted); }
+
+    .mock-bar-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .mock-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; margin-bottom: 0.7rem; }
+    .mock-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,var(--purple),var(--pink)); }
+
+    .mini-cards { display:flex; gap:0.7rem; margin-top:1rem; }
+    .mini-card {
+      flex:1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 0.7rem;
+      font-size: 0.75rem;
+    }
+    .mini-card-icon { font-size: 1.2rem; margin-bottom: 0.3rem; }
+    .mini-card-title { font-weight: 600; font-size: 0.78rem; }
+    .mini-card-val { color: var(--purple-light); font-weight: 700; }
+
+    /* ── STATS ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 2rem 6%;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      flex: 1;
+      min-width: 160px;
+      text-align: center;
+      padding: 1.5rem 1rem;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+
+    .stat-num {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg,#a78bfa,#ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* ── SECTION BASE ── */
+    section { padding: 6rem 6%; position: relative; }
+    .section-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .section-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 560px;
+    }
+
+    /* ── FEATURES ── */
+    #features { background: var(--bg2); }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      cursor: default;
+    }
+    .feature-card:hover {
+      border-color: rgba(124,58,237,0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(124,58,237,0.12);
+    }
+
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; }
+    .feature-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+
+    /* ── HOW IT WORKS ── */
+    #how { background: var(--bg); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      margin-top: 3.5rem;
+      position: relative;
+    }
+
+    .step {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    .step-num {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin: 0 auto 1.2rem;
+      box-shadow: 0 0 30px rgba(124,58,237,0.4);
+    }
+
+    .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .step p { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+
+    /* ── TESTIMONIALS ── */
+    #testimonials { background: var(--bg2); }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+    }
+
+    .tcard {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 1.8rem;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .tcard:hover { transform: translateY(-4px); border-color: rgba(124,58,237,0.3); }
+
+    .stars { color: #f59e0b; font-size: 0.9rem; margin-bottom: 1rem; letter-spacing: 2px; }
+    .tcard-text { font-size: 0.9rem; color: var(--muted); line-height: 1.75; margin-bottom: 1.4rem; font-style: italic; }
+    .tcard-author { display: flex; align-items: center; gap: 0.8rem; }
+    .tcard-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; color: #fff;
+    }
+    .tcard-name { font-size: 0.88rem; font-weight: 700; }
+    .tcard-role { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── PRICING ── */
+    #pricing { background: var(--bg); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+      max-width: 960px;
+    }
+
+    .price-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 2.2rem;
+      transition: transform 0.3s;
+    }
+    .price-card.popular {
+      background: rgba(124,58,237,0.1);
+      border-color: rgba(124,58,237,0.5);
+      position: relative;
+      box-shadow: 0 0 60px rgba(124,58,237,0.15);
+    }
+    .price-card:hover { transform: translateY(-4px); }
+
+    .popular-tag {
+      position: absolute;
+      top: -14px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .price-name { font-size: 0.85rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    .price-amount { font-size: 3rem; font-weight: 900; letter-spacing: -2px; margin-bottom: 0.2rem; }
+    .price-amount span { font-size: 1rem; font-weight: 500; color: var(--muted); }
+    .price-period { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.8rem; }
+
+    .price-features { list-style: none; margin-bottom: 2rem; }
+    .price-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      padding: 0.45rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .price-features li:last-child { border-bottom: none; }
+    .price-features li .check { color: #22c55e; font-weight: 700; flex-shrink: 0; }
+
+    .btn-plan {
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 50px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-plan-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text);
+    }
+    .btn-plan-outline:hover { border-color: var(--purple-light); background: rgba(124,58,237,0.08); }
+    .btn-plan-fill {
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: #fff;
+      box-shadow: 0 0 30px rgba(124,58,237,0.4);
+    }
+    .btn-plan-fill:hover { box-shadow: 0 0 50px rgba(124,58,237,0.6); transform: translateY(-1px); }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: var(--bg2);
+      text-align: center;
+      padding: 7rem 6%;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-orb1 { position:absolute;width:500px;height:500px;border-radius:50%;background:rgba(124,58,237,0.2);filter:blur(100px);top:-100px;left:50%;transform:translateX(-50%);pointer-events:none; }
+    .cta-section h2 { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 1rem; position: relative; }
+    .cta-section p { font-size: 1rem; color: var(--muted); margin-bottom: 2.5rem; position: relative; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 3rem 6%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-logo {
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .footer-links { display: flex; gap: 1.8rem; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 0.8rem; color: var(--muted); }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero-visual { display: none; }
+      .hero-content { max-width: 100%; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-item:last-child { border-bottom: none; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">AceYourInterview</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <button class="nav-cta">Get Started →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-content fade-up">
+    <div class="badge"><span class="dot"></span> AI-Powered Interview Coach</div>
+    <h1>Land Your<br><span class="gradient-text">Dream Job</span><br>with Confidence</h1>
+    <p>Practice real interview questions, get instant AI feedback, and track your progress — so you walk in prepared and walk out with an offer.</p>
+    <div class="hero-btns">
+      <a href="#pricing" class="btn-primary">Start for Free →</a>
+      <a href="#how" class="btn-ghost">▶ See how it works</a>
+    </div>
+  </div>
+
+  <!-- Floating Mock Card -->
+  <div class="hero-visual fade-up" style="transition-delay:0.2s">
+    <div class="mock-card">
+      <div class="mock-header">
+        <div class="mock-avatar">A</div>
+        <div>
+          <div class="mock-name">Alex Johnson</div>
+          <div class="mock-sub">Software Engineer Candidate</div>
+        </div>
+      </div>
+      <div class="mock-q">Current Question</div>
+      <div class="mock-question">"Tell me about a time you solved a complex technical challenge under pressure."</div>
+      <div class="score-row">
+        <div class="score-chip"><div class="val">94</div><div class="lbl">Clarity</div></div>
+        <div class="score-chip"><div class="val">87</div><div class="lbl">Confidence</div></div>
+        <div class="score-chip"><div class="val">91</div><div class="lbl">STAR Score</div></div>
+      </div>
+      <div class="mock-bar-label">Overall performance</div>
+      <div class="mock-bar"><div class="mock-bar-fill" style="width:90%"></div></div>
+      <div class="mock-bar-label">Communication</div>
+      <div class="mock-bar"><div class="mock-bar-fill" style="width:76%;background:linear-gradient(90deg,#06b6d4,#7c3aed)"></div></div>
+      <div class="mini-cards">
+        <div class="mini-card"><div class="mini-card-icon">🎯</div><div class="mini-card-title">Sessions</div><div class="mini-card-val">24</div></div>
+        <div class="mini-card"><div class="mini-card-icon">🔥</div><div class="mini-card-title">Streak</div><div class="mini-card-val">7 days</div></div>
+        <div class="mini-card"><div class="mini-card-icon">📈</div><div class="mini-card-title">Improved</div><div class="mini-card-val">+38%</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-item fade-up"><div class="stat-num">97%</div><div class="stat-label">Offer success rate</div></div>
+  <div class="stat-item fade-up" style="transition-delay:0.1s"><div class="stat-num">50K+</div><div class="stat-label">Active users</div></div>
+  <div class="stat-item fade-up" style="transition-delay:0.2s"><div class="stat-num">2,000+</div><div class="stat-label">Interview questions</div></div>
+  <div class="stat-item fade-up" style="transition-delay:0.3s"><div class="stat-num">4.9★</div><div class="stat-label">Average rating</div></div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-tag">✦ Features</div>
+  <h2 class="section-title">Everything you need to<br><span class="gradient-text">ace every interview</span></h2>
+  <p class="section-sub">From behavioral questions to technical deep-dives, our AI prepares you for every scenario you'll face.</p>
+
+  <div class="features-grid">
+    <div class="feature-card fade-up" style="transition-delay:0.0s">
+      <div class="feature-icon" style="background:rgba(124,58,237,0.15)">🤖</div>
+      <h3>AI Mock Interviews</h3>
+      <p>Realistic conversations with an AI interviewer that adapts to your role, experience level, and the company you're targeting.</p>
+    </div>
+    <div class="feature-card fade-up" style="transition-delay:0.1s">
+      <div class="feature-icon" style="background:rgba(236,72,153,0.12)">📊</div>
+      <h3>Instant Feedback & Scores</h3>
+      <p>Get detailed breakdowns on clarity, confidence, structure, and content — with specific tips to improve after every answer.</p>
+    </div>
+    <div class="feature-card fade-up" style="transition-delay:0.2s">
+      <div class="feature-icon" style="background:rgba(6,182,212,0.12)">🎙️</div>
+      <h3>Voice Analysis</h3>
+      <p>Record your answers and get AI feedback on pace, filler words, tone, and delivery — so you sound polished and confident.</p>
+    </div>
+    <div class="feature-card fade-up" style="transition-delay:0.3s">
+      <div class="feature-icon" style="background:rgba(245,158,11,0.12)">🗂️</div>
+      <h3>Question Bank (2,000+)</h3>
+      <p>Curated questions across every industry, role, and company — including Google, Amazon, Meta, and 500+ other employers.</p>
+    </div>
+    <div class="feature-card fade-up" style="transition-delay:0.4s">
+      <div class="feature-icon" style="background:rgba(34,197,94,0.12)">📈</div>
+      <h3>Progress Tracking</h3>
+      <p>Visualize your growth over time with detailed analytics. See exactly where you've improved and what still needs work.</p>
+    </div>
+    <div class="feature-card fade-up" style="transition-delay:0.5s">
+      <div class="feature-icon" style="background:rgba(239,68,68,0.12)">⚡</div>
+      <h3>STAR Method Coach</h3>
+      <p>Our AI guides you to structure behavioral answers using the proven STAR framework — making your stories compelling every time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div style="text-align:center; max-width:600px; margin:0 auto">
+    <div class="section-tag">✦ How it works</div>
+    <h2 class="section-title">From nervous to<br><span class="gradient-text">hired in 4 steps</span></h2>
+    <p class="section-sub" style="margin:0 auto">A simple, proven process that thousands of candidates have used to land offers at top companies.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step fade-up">
+      <div class="step-num">1</div>
+      <h3>Create your profile</h3>
+      <p>Tell us your target role, industry, and experience level so we can personalize your practice sessions.</p>
+    </div>
+    <div class="step fade-up" style="transition-delay:0.1s">
+      <div class="step-num">2</div>
+      <h3>Practice daily</h3>
+      <p>Answer AI-generated questions tailored to real job descriptions and get instant, detailed feedback.</p>
+    </div>
+    <div class="step fade-up" style="transition-delay:0.2s">
+      <div class="step-num">3</div>
+      <h3>Track your growth</h3>
+      <p>Watch your scores improve as you practice. Our algorithm focuses your effort where it matters most.</p>
+    </div>
+    <div class="step fade-up" style="transition-delay:0.3s">
+      <div class="step-num">4</div>
+      <h3>Walk in confident</h3>
+      <p>Enter your real interview prepared, polished, and ready to impress — and land the offer you deserve.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-tag">✦ Testimonials</div>
+  <h2 class="section-title">Real people.<br><span class="gradient-text">Real offers.</span></h2>
+  <p class="section-sub">Join thousands of candidates who used AceYourInterview to land roles at their dream companies.</p>
+
+  <div class="testimonials-grid">
+    <div class="tcard fade-up">
+      <div class="stars">★★★★★</div>
+      <p class="tcard-text">"I went from blanking on behavioral questions to telling clear, compelling stories. Got an offer from Google after just 3 weeks of daily practice!"</p>
+      <div class="tcard-author">
+        <div class="tcard-avatar" style="background:linear-gradient(135deg,#7c3aed,#06b6d4)">S</div>
+        <div><div class="tcard-name">Sarah M.</div><div class="tcard-role">Software Engineer at Google</div></div>
+      </div>
+    </div>
+    <div class="tcard fade-up" style="transition-delay:0.1s">
+      <div class="stars">★★★★★</div>
+      <p class="tcard-text">"The AI feedback is incredibly specific — it actually told me I said 'um' 14 times in one answer. Fixed that in a week. Best interview tool I've found."</p>
+      <div class="tcard-author">
+        <div class="tcard-avatar" style="background:linear-gradient(135deg,#ec4899,#f97316)">J</div>
+        <div><div class="tcard-name">James K.</div><div class="tcard-role">Product Manager at Meta</div></div>
+      </div>
+    </div>
+    <div class="tcard fade-up" style="transition-delay:0.2s">
+      <div class="stars">★★★★★</div>
+      <p class="tcard-text">"I was switching careers and felt totally unprepared. AceYourInterview helped me reframe my experience for tech and I landed a role I thought was out of reach."</p>
+      <div class="tcard-author">
+        <div class="tcard-avatar" style="background:linear-gradient(135deg,#06b6d4,#22c55e)">M</div>
+        <div><div class="tcard-name">Maria L.</div><div class="tcard-role">Data Analyst at Stripe</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-tag">✦ Pricing</div>
+  <h2 class="section-title">Simple, transparent<br><span class="gradient-text">pricing</span></h2>
+  <p class="section-sub">Start free, upgrade when you're ready. No hidden fees.</p>
+
+  <div class="pricing-grid">
+    <div class="price-card fade-up">
+      <div class="price-name">Starter</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">Free forever</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> 5 mock interviews / month</li>
+        <li><span class="check">✓</span> 100 question bank questions</li>
+        <li><span class="check">✓</span> Basic AI feedback</li>
+        <li><span class="check">✓</span> Progress dashboard</li>
+        <li style="opacity:0.4"><span>✗</span> Voice analysis</li>
+        <li style="opacity:0.4"><span>✗</span> Company-specific prep</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline">Get started free</button>
+    </div>
+
+    <div class="price-card popular fade-up" style="transition-delay:0.1s">
+      <div class="popular-tag">MOST POPULAR</div>
+      <div class="price-name">Pro</div>
+      <div class="price-amount">$19<span>/mo</span></div>
+      <div class="price-period">Billed monthly · cancel anytime</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Unlimited mock interviews</li>
+        <li><span class="check">✓</span> Full 2,000+ question bank</li>
+        <li><span class="check">✓</span> Advanced AI feedback</li>
+        <li><span class="check">✓</span> Voice & tone analysis</li>
+        <li><span class="check">✓</span> Company-specific prep</li>
+        <li><span class="check">✓</span> STAR method coaching</li>
+      </ul>
+      <button class="btn-plan btn-plan-fill">Start Pro — $19/mo</button>
+    </div>
+
+    <div class="price-card fade-up" style="transition-delay:0.2s">
+      <div class="price-name">Lifetime</div>
+      <div class="price-amount">$149</div>
+      <div class="price-period">One-time payment</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Everything in Pro</li>
+        <li><span class="check">✓</span> Lifetime access</li>
+        <li><span class="check">✓</span> All future updates</li>
+        <li><span class="check">✓</span> Priority support</li>
+        <li><span class="check">✓</span> Resume review (1x)</li>
+        <li><span class="check">✓</span> Expert coaching call (1x)</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline">Get lifetime access</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section fade-up">
+  <div class="cta-orb1"></div>
+  <h2>Your dream job is<br><span class="gradient-text">one interview away</span></h2>
+  <p>Stop leaving offers on the table. Start practicing today — it's free.</p>
+  <a href="#pricing" class="btn-primary" style="font-size:1rem;padding:1rem 2.5rem">Get Started for Free →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">AceYourInterview</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Support</a>
+    <a href="#">Blog</a>
+  </div>
+  <div class="footer-copy">© 2026 AceYourInterview. All rights reserved.</div>
+</footer>
+
+<script>
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Smooth nav highlight
+  const sections = document.querySelectorAll('section[id], #pricing');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.style.color = link.getAttribute('href') === '#' + entry.target.id ? '#f1f5f9' : '';
+        });
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('section[id]').forEach(s => sectionObserver.observe(s));
+
+  // Animate stat numbers
+  function animateCount(el, target, suffix='') {
+    let start = 0;
+    const duration = 1800;
+    const step = timestamp => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const val = Math.floor(eased * target);
+      el.textContent = val.toLocaleString() + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const nums = entry.target.querySelectorAll('.stat-num');
+        nums[0] && animateCount(nums[0], 97, '%');
+        nums[1] && animateCount(nums[1], 50, 'K+');
+        nums[2] && animateCount(nums[2], 2000, '+');
+        nums[3] && (nums[3].textContent = '4.9★');
+        statsObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const statsSection = document.querySelector('.stats');
+  if (statsSection) statsObserver.observe(statsSection);
+</script>
+</body>
+</html>

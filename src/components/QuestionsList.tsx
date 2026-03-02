@@ -42,7 +42,7 @@ const QuestionsList = () => {
           const primaryText = language === 'en' ? source.en_text ?? source.question : source.am_text ?? source.question;
 
           return (
-            <div key={question.id} className="interactive-row p-3.5">
+            <div key={question.id} className="interactive-row bg-[var(--surface-2)] p-3.5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-[var(--text-1)]">

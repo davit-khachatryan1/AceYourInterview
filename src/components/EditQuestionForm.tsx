@@ -179,9 +179,9 @@ const EditQuestionForm = ({ question, onUpdated, onCancel }: EditQuestionFormPro
           </p>
         )}
 
-        <div className="space-y-5">
+        <div className="space-y-5 rounded-[20px] border border-[var(--border)] bg-[var(--surface-2)] p-4 md:p-5">
           <div>
-            <label htmlFor="editTopicId" className="mb-1.5 block text-sm text-[var(--text-2)]">Topic ID</label>
+            <label htmlFor="editTopicId" className="mb-1.5 block text-sm font-semibold text-[var(--text-1)]">Topic ID</label>
             <input id="editTopicId" value={topicId} onChange={(event) => setTopicId(event.target.value)} className="search-input w-full" />
           </div>
 
@@ -216,12 +216,12 @@ const EditQuestionForm = ({ question, onUpdated, onCancel }: EditQuestionFormPro
           </div>
 
           <div>
-            <p className="mb-2 text-sm text-[var(--text-2)]">Examples (required)</p>
+            <p className="mb-2 text-sm font-semibold text-[var(--text-1)]">Examples (required)</p>
             <AdminExamplesEditor examples={examples} onChange={setExamples} />
           </div>
 
           <div>
-            <p className="mb-1.5 text-sm text-[var(--text-2)]">Category tags</p>
+            <p className="mb-1.5 text-sm font-semibold text-[var(--text-1)]">Category tags</p>
             <AdminTagEditor tags={tags} onChange={setTags} />
           </div>
         </div>

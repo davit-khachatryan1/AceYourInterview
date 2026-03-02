@@ -36,9 +36,15 @@ const InterviewCard = ({ question, learned, onLearnedChange, onOpen }: Interview
           onOpen();
         }
       }}
-      className="group flex h-full cursor-pointer flex-col"
+      className="group relative flex h-full cursor-pointer flex-col overflow-hidden"
       aria-label={`Open details for ${question.questionText}`}
     >
+      {/* Gradient accent line at top, revealed on hover */}
+      <span
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{ background: 'linear-gradient(90deg, #7c3aed, #ec4899)' }}
+      />
+
       <div className="mb-4 flex items-start justify-between gap-3">
         <Badge variant="topic">{question.topicLabel}</Badge>
         <button
@@ -73,7 +79,7 @@ const InterviewCard = ({ question, learned, onLearnedChange, onOpen }: Interview
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
-        <Button type="button" variant="secondary" size="sm" onClick={onOpen} className="min-w-[6.5rem]">
+        <Button type="button" variant="primary" size="sm" onClick={onOpen} className="min-w-[6.5rem]">
           Start
           <ArrowUpRight size={14} />
         </Button>
@@ -87,9 +93,9 @@ const InterviewCard = ({ question, learned, onLearnedChange, onOpen }: Interview
             type="checkbox"
             checked={learned}
             onChange={(event) => onLearnedChange(event.target.checked)}
-            className="h-4 w-4 rounded border border-[var(--border)] bg-transparent accent-[var(--brand-primary)]"
+            className="h-4 w-4 rounded border border-[var(--border)] bg-transparent accent-[#7c3aed]"
           />
-          Mark as learned
+          {learned ? <span className="font-semibold text-[var(--brand-primary)]">Learned ✓</span> : 'Mark as learned'}
         </label>
       </div>
     </Card>
