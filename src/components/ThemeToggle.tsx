@@ -26,8 +26,8 @@ const ThemeToggle = () => {
             onClick={() => setTheme(option.value)}
             className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all ${
               active
-                ? 'border border-[color-mix(in_srgb,var(--burnt-peach)_56%,transparent)] bg-[linear-gradient(180deg,var(--soft-peach),var(--light-caramel))] text-[var(--pitch-black)] shadow-[0_8px_18px_color-mix(in_srgb,var(--burnt-peach)_32%,transparent)]'
-                : 'text-[var(--text-2)] hover:text-[var(--text-1)]'
+                ? 'border border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_12%,var(--surface-1))] text-[var(--brand-primary)]'
+                : 'text-[var(--text-2)] hover:bg-[var(--surface-1)] hover:text-[var(--text-1)]'
             }`}
             aria-pressed={active}
             aria-label={`Switch to ${option.label} theme`}

@@ -272,9 +272,9 @@ const QuestionDetailModal = ({
             <div
               ref={dialogRef}
               tabIndex={-1}
-              className="panel-surface flex h-full flex-col rounded-none border-0 md:mx-auto md:max-w-6xl md:rounded-[22px] md:border"
+              className="flex h-full flex-col rounded-none bg-[var(--surface-1)] md:mx-auto md:max-w-6xl md:rounded-[24px] md:border md:border-[var(--border)] md:shadow-[var(--shadow-strong)]"
             >
-              <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg-elevated)] p-4 md:p-5">
+              <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--surface-1)] p-4 md:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -331,7 +331,7 @@ const QuestionDetailModal = ({
                         }}
                         className={`pill-control px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition-all ${
                           active
-                            ? 'border-[var(--chip-border)] bg-[var(--chip-bg)] text-[var(--chip-text)]'
+                            ? 'border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_10%,var(--surface-1))] text-[var(--brand-primary)]'
                             : 'text-[var(--text-3)]'
                         }`}
                       >
@@ -348,14 +348,14 @@ const QuestionDetailModal = ({
                   ref={(node) => {
                     sectionRefs.current.answer = node;
                   }}
-                  className="elevated-card space-y-3 p-5"
+                  className="panel-surface space-y-3 p-5"
                   initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                   animate={reduceMotion ? {} : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, delay: 0.03 }}
                 >
                   <h3 className="display-heading text-[1.4rem] text-[var(--text-1)]">Answer</h3>
                   <p className="leading-relaxed text-[var(--text-2)]">{question.explanationText}</p>
-                  <div className="rounded-xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface-2)_88%,transparent)] p-4">
+                  <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
                     <p className="text-sm font-semibold text-[var(--text-1)]">Interview summary</p>
                     <p className="mt-2 leading-relaxed text-[var(--text-2)]">{question.answerText}</p>
                   </div>
@@ -366,7 +366,7 @@ const QuestionDetailModal = ({
                   ref={(node) => {
                     sectionRefs.current['code-parts'] = node;
                   }}
-                  className="elevated-card space-y-3 p-5"
+                  className="panel-surface space-y-3 p-5"
                   initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                   animate={reduceMotion ? {} : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, delay: 0.06 }}
@@ -384,7 +384,7 @@ const QuestionDetailModal = ({
                   ref={(node) => {
                     sectionRefs.current.examples = node;
                   }}
-                  className="elevated-card space-y-3 p-5"
+                  className="panel-surface space-y-3 p-5"
                   initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                   animate={reduceMotion ? {} : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, delay: 0.09 }}
@@ -393,7 +393,7 @@ const QuestionDetailModal = ({
                   {question.examples.length > 0 ? (
                     <div className="grid gap-4 md:grid-cols-2">
                       {question.examples.map((example) => (
-                        <article key={example.id} className="rounded-xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface-2)_84%,transparent)] p-4">
+                        <article key={example.id} className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
                           <h4 className="text-base font-semibold text-[var(--text-1)]">{example.title}</h4>
                           <p className="mt-2 text-sm leading-relaxed text-[var(--text-2)]">{example.description}</p>
                           <div className="mt-3">
@@ -412,7 +412,7 @@ const QuestionDetailModal = ({
                   ref={(node) => {
                     sectionRefs.current.pitfalls = node;
                   }}
-                  className="elevated-card space-y-3 p-5"
+                  className="panel-surface space-y-3 p-5"
                   initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                   animate={reduceMotion ? {} : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, delay: 0.12 }}
@@ -421,7 +421,7 @@ const QuestionDetailModal = ({
                   {question.pitfalls.length > 0 ? (
                     <ul className="space-y-2">
                       {question.pitfalls.map((pitfall, index) => (
-                        <li key={`${question.id}-pitfall-${index}`} className="rounded-lg border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface-2)_86%,transparent)] p-3 text-sm text-[var(--text-2)]">
+                        <li key={`${question.id}-pitfall-${index}`} className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm text-[var(--text-2)]">
                           {pitfall}
                         </li>
                       ))}
@@ -436,7 +436,7 @@ const QuestionDetailModal = ({
                   ref={(node) => {
                     sectionRefs.current.followups = node;
                   }}
-                  className="elevated-card space-y-3 p-5"
+                  className="panel-surface space-y-3 p-5"
                   initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                   animate={reduceMotion ? {} : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, delay: 0.15 }}
@@ -445,7 +445,7 @@ const QuestionDetailModal = ({
                   {question.followups.length > 0 ? (
                     <ul className="space-y-2">
                       {question.followups.map((followup, index) => (
-                        <li key={`${question.id}-followup-${index}`} className="rounded-lg border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface-2)_86%,transparent)] p-3 text-sm text-[var(--text-2)]">
+                        <li key={`${question.id}-followup-${index}`} className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm text-[var(--text-2)]">
                           {followup}
                         </li>
                       ))}

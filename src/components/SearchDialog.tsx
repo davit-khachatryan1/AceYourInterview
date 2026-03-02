@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
+import Badge from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import type { NormalizedQuestion } from '@/types/interview';
 
@@ -74,7 +76,7 @@ const SearchDialog = ({ open, onClose, questions, activeTopicId, onSelectQuestio
           />
 
           <motion.section
-            className="fixed left-1/2 top-[8vh] z-50 w-[min(980px,94vw)] -translate-x-1/2 panel-surface overflow-hidden rounded-[18px]"
+            className="fixed left-1/2 top-[7vh] z-50 w-[min(900px,94vw)] -translate-x-1/2 overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--surface-1)] shadow-[var(--shadow-strong)]"
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.98 }}
             animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.99 }}
@@ -86,12 +88,12 @@ const SearchDialog = ({ open, onClose, questions, activeTopicId, onSelectQuestio
             <div className="border-b border-[var(--border)] p-4 md:p-5">
               <div className="flex items-center gap-3">
                 <Search size={18} className="text-[var(--text-3)]" />
-                <input
+                <Input
                   ref={inputRef}
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search questions, examples, and tags..."
-                  className="search-input w-full bg-transparent"
+                  className="border-0 bg-transparent px-0 py-0 shadow-none focus:border-0 focus:bg-transparent focus:shadow-none"
                 />
                 <button type="button" onClick={onClose} className="icon-button" aria-label="Close search dialog">
                   <X size={16} />
@@ -102,11 +104,14 @@ const SearchDialog = ({ open, onClose, questions, activeTopicId, onSelectQuestio
                 <button
                   type="button"
                   onClick={() => setSearchAllTopics((current) => !current)}
-                  className={`pill-control px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] ${searchAllTopics ? 'border-[color-mix(in_srgb,var(--sage-green)_58%,var(--border))] bg-[color-mix(in_srgb,var(--lemon-chiffon)_22%,var(--surface-2))] text-[var(--text-1)]' : 'text-[var(--text-3)]'}`}
+                  className={`pill-control px-3 py-1.5 text-xs font-semibold ${searchAllTopics ? 'border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_10%,var(--surface-1))] text-[var(--brand-primary)]' : 'text-[var(--text-3)]'}`}
                 >
                   {searchAllTopics ? 'All Topics' : 'Current Topic'}
                 </button>
-                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">{results.length} results</p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="kbd">ESC</Badge>
+                  <p className="text-xs text-[var(--text-3)]">{results.length} results</p>
+                </div>
               </div>
             </div>
 
@@ -128,11 +133,11 @@ const SearchDialog = ({ open, onClose, questions, activeTopicId, onSelectQuestio
                           onSelectQuestion(result.id, result.topicId);
                           onClose();
                         }}
-                        className="interactive-row w-full px-4 py-3 text-left hover:border-[color-mix(in_srgb,var(--sage-green)_64%,var(--border))] hover:bg-[color-mix(in_srgb,var(--surface-1)_82%,var(--lemon-chiffon)_18%)]"
+                        className="interactive-row w-full px-4 py-3 text-left"
                       >
                         <div className="flex items-center justify-between gap-3">
                           <p className="truncate text-sm font-semibold text-[var(--text-1)]">{result.questionText}</p>
-                          <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--text-3)]">{result.topicLabel}</span>
+                          <span className="text-[10px] font-medium text-[var(--text-3)]">{result.topicLabel}</span>
                         </div>
                       </button>
                     </motion.li>

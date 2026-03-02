@@ -42,10 +42,17 @@ const QuestionsList = () => {
           const primaryText = language === 'en' ? source.en_text ?? source.question : source.am_text ?? source.question;
 
           return (
-            <div key={question.id} className="interactive-row p-3">
-              <p className="text-sm font-semibold text-[var(--text-1)]">{primaryText || 'Untitled question'}</p>
-              <p className="mt-1 text-xs text-[var(--text-3)]">{question.topicLabel}</p>
-              <div className="mt-3 flex gap-2">
+            <div key={question.id} className="interactive-row p-3.5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-[var(--text-1)]">
+                    {primaryText || 'Untitled question'}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--text-3)]">{question.topicLabel}</p>
+                </div>
+                <span className="micro-badge">#{question.id.slice(0, 6)}</span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
                   className="btn-secondary px-2.5 py-1.5 text-xs"
@@ -56,7 +63,7 @@ const QuestionsList = () => {
                 </button>
                 <button
                   type="button"
-                  className="btn-ghost border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--text-1)] hover:border-[color-mix(in_srgb,var(--burnt-tangerine)_36%,var(--border))] hover:text-[color-mix(in_srgb,var(--burnt-tangerine)_92%,white)]"
+                  className="btn-ghost border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--text-1)] hover:border-[var(--border-strong)]"
                   onClick={() => handleDelete(question.id)}
                 >
                   <Trash2 size={12} />

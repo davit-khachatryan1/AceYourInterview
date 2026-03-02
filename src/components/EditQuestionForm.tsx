@@ -162,16 +162,19 @@ const EditQuestionForm = ({ question, onUpdated, onCancel }: EditQuestionFormPro
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay)] p-4">
-      <form onSubmit={handleSubmit} className="panel-surface max-h-[90vh] w-full max-w-5xl overflow-y-auto p-5 md:p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="display-heading text-3xl text-[var(--text-1)]">Edit Question</h3>
+      <form onSubmit={handleSubmit} className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[24px] border border-[var(--border)] bg-[var(--surface-1)] p-5 shadow-[var(--shadow-strong)] md:p-6">
+        <div className="mb-4 flex items-center justify-between border-b border-[var(--border)] pb-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Edit Question</p>
+            <h3 className="display-heading mt-1 text-3xl text-[var(--text-1)]">Update content</h3>
+          </div>
           <button type="button" onClick={onCancel} className="icon-button" aria-label="Close edit dialog">
             <X size={15} />
           </button>
         </div>
 
         {error && (
-          <p className="mb-4 rounded-xl border border-[color-mix(in_srgb,var(--burnt-tangerine)_45%,var(--border))] bg-[color-mix(in_srgb,var(--burnt-tangerine)_16%,transparent)] p-2.5 text-sm text-[var(--text-1)]">
+          <p className="mb-4 rounded-2xl border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] p-3 text-sm text-[var(--text-1)]">
             {error}
           </p>
         )}
@@ -209,7 +212,7 @@ const EditQuestionForm = ({ question, onUpdated, onCancel }: EditQuestionFormPro
 
           <div className="grid gap-4 md:grid-cols-2">
             <input id="editCodeLang" value={codeLanguage} onChange={(event) => setCodeLanguage(event.target.value)} className="search-input w-full" placeholder="Primary code language" />
-            <textarea id="editCodeSnippet" value={codeSnippet} onChange={(event) => setCodeSnippet(event.target.value)} className="search-input min-h-24 w-full font-mono text-xs" placeholder="Primary code snippet" />
+            <textarea id="editCodeSnippet" value={codeSnippet} onChange={(event) => setCodeSnippet(event.target.value)} className="search-input code-editor-input min-h-24 w-full font-mono text-xs" placeholder="Primary code snippet" />
           </div>
 
           <div>

@@ -288,79 +288,143 @@ export default function Home() {
           onMobileClose={() => setMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="mx-auto w-full max-w-[1240px]">
-            <header className="panel-surface mb-6 p-5 md:p-7">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setMobileSidebarOpen(true)}
-                    className="icon-button md:hidden"
-                    aria-label="Open topics"
-                  >
-                    <Menu size={18} />
-                  </button>
-
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="display-heading text-4xl md:text-6xl">AceYourInterview</h1>
-                      {isDemoFallback && (
-                        <span className="micro-badge">
-                          Demo Mode
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-2 text-sm text-[var(--text-2)]">Focused prep mode · {language === 'en' ? 'English' : 'Armenian'}</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                  <ThemeToggle />
-                  <DualLanguageToggle />
-                </div>
-              </div>
-
-              <div className="mt-6">
+        <main className="flex-1 overflow-y-auto">
+          <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_92%,var(--bg-elevated))] backdrop-blur-sm">
+            <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-4 px-4 py-4 md:px-8 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => setSearchOpen(true)}
-                  className="search-input flex w-full items-center gap-3 px-4 py-3.5 text-left text-sm"
-                  aria-label="Open search"
+                  onClick={() => setMobileSidebarOpen(true)}
+                  className="icon-button md:hidden"
+                  aria-label="Open topics"
                 >
-                  <Search size={17} className="text-[var(--text-3)]" />
-                  <span className="flex-1 text-[var(--text-2)]">Search questions, tags, and examples</span>
-                  <span className="kbd-badge">
-                    ⌘K
-                  </span>
+                  <Menu size={18} />
                 </button>
-              </div>
-            </header>
 
-            {status && <AppStatusBanner variant={status.variant} message={status.message} />}
-
-            <section className="mb-6 grid gap-4 md:grid-cols-3">
-              <div className="elevated-card relative overflow-hidden p-5 before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-[linear-gradient(90deg,color-mix(in_srgb,var(--sage-green)_54%,transparent),color-mix(in_srgb,var(--soft-peach)_38%,transparent))]">
-                <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-3)]">Topic Progress</p>
-                <p className="mt-1 text-3xl font-semibold tracking-[-0.02em]">{completionState.percentage}%</p>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-3)]">
+                      Interview Workspace
+                    </p>
+                    {isDemoFallback && <span className="micro-badge">Demo Mode</span>}
+                  </div>
+                  <h1 className="display-heading mt-1 text-2xl md:text-3xl">AceYourInterview</h1>
+                </div>
               </div>
-              <div className="elevated-card relative overflow-hidden p-5 before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-[linear-gradient(90deg,color-mix(in_srgb,var(--light-caramel)_44%,transparent),color-mix(in_srgb,var(--sage-green)_48%,transparent))]">
-                <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-3)]">Learned</p>
-                <p className="mt-1 text-3xl font-semibold tracking-[-0.02em]">
-                  {completionState.learnedCount}/{completionState.totalCount}
+
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="search-input flex w-full max-w-2xl items-center gap-3 px-4 py-3 text-left text-sm lg:flex-1"
+                aria-label="Open search"
+              >
+                <Search size={17} className="text-[var(--text-3)]" />
+                <span className="flex-1 text-[var(--text-2)]">
+                  Search questions, examples, and tags
+                </span>
+                <span className="kbd-badge">Cmd K</span>
+              </button>
+
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                <DualLanguageToggle />
+                <ThemeToggle />
+              </div>
+            </div>
+          </div>
+
+          <div className="mx-auto w-full max-w-[1280px] space-y-6 px-4 py-6 md:px-8 md:py-8">
+            {status && (
+              <div className="mb-1">
+                <AppStatusBanner variant={status.variant} message={status.message} />
+              </div>
+            )}
+
+            <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
+              <div className="panel-surface p-6 md:p-8">
+                <p className="text-sm font-medium text-[var(--text-3)]">Continue learning</p>
+                <h2 className="display-heading mt-2 text-3xl md:text-5xl">Focused prep, cleaner workflow.</h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-2)] md:text-base">
+                  Stay on your active topic, open question details quickly, and keep momentum with a workspace designed for fast interview repetition.
                 </p>
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <span className="chip-pill">{activeTopicLabel}</span>
+                  <span className="micro-badge">
+                    {language === 'en' ? 'English mode' : 'Armenian mode'}
+                  </span>
+                  <span className="micro-badge">{filteredQuestions.length} cards in view</span>
+                </div>
               </div>
-              <div className="elevated-card relative overflow-hidden p-5 before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-[linear-gradient(90deg,color-mix(in_srgb,var(--sage-green)_52%,transparent),color-mix(in_srgb,var(--lemon-chiffon)_34%,transparent))]">
-                <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-3)]">Topic</p>
-                <p className="mt-1 text-xl font-semibold tracking-[-0.01em]">{activeTopicLabel}</p>
+
+              <div className="panel-surface p-6">
+                <p className="text-sm font-medium text-[var(--text-3)]">Continue learning</p>
+                <div className="mt-4 space-y-5">
+                  <div>
+                    <div className="flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Topic Progress</p>
+                        <p className="mt-1 text-4xl font-semibold tracking-[-0.03em]">
+                          {completionState.percentage}%
+                        </p>
+                      </div>
+                      <span className="text-sm font-medium text-[var(--text-2)]">
+                        {completionState.learnedCount}/{completionState.totalCount} learned
+                      </span>
+                    </div>
+                    <div className="mt-4 h-2.5 rounded-full bg-[var(--surface-3)]">
+                      <div
+                        className="h-full rounded-full bg-[var(--brand-primary)]"
+                        style={{ width: `${completionState.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                      <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Active Topic</p>
+                      <p className="mt-2 text-lg font-semibold text-[var(--text-1)]">{activeTopicLabel}</p>
+                    </div>
+                    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                      <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Questions Ready</p>
+                      <p className="mt-2 text-lg font-semibold text-[var(--text-1)]">{filteredQuestions.length}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </section>
 
-            <section className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="display-heading text-[1.65rem]">Interview Deck</h2>
-                <p className="text-sm text-[var(--text-2)]">Open a question card to study full details, code parts, and follow-ups.</p>
+            <section className="grid gap-4 md:grid-cols-3">
+              <div className="panel-surface p-5">
+                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Progress</p>
+                <p className="mt-2 text-3xl font-semibold tracking-[-0.03em]">{completionState.percentage}%</p>
+                <div className="mt-4 h-1.5 rounded-full bg-[var(--surface-3)]">
+                  <div
+                    className="h-full rounded-full bg-[var(--brand-primary)]"
+                    style={{ width: `${completionState.percentage}%` }}
+                  />
+                </div>
               </div>
+              <div className="panel-surface p-5">
+                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Learned Count</p>
+                <p className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
+                  {completionState.learnedCount}/{completionState.totalCount}
+                </p>
+                <p className="mt-3 text-sm text-[var(--text-2)]">Track completion without leaving the deck.</p>
+              </div>
+              <div className="panel-surface p-5">
+                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-3)]">Current Topic</p>
+                <p className="mt-2 text-2xl font-semibold tracking-[-0.02em]">{activeTopicLabel}</p>
+                <p className="mt-3 text-sm text-[var(--text-2)]">Switch topics from the left rail at any time.</p>
+              </div>
+            </section>
+
+            <section className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 className="display-heading text-[1.65rem]">Question Deck</h2>
+                <p className="mt-1 text-sm text-[var(--text-2)]">
+                  Open a card to review the full answer, code parts, examples, and follow-ups.
+                </p>
+              </div>
+              <span className="micro-badge">{filteredQuestions.length} visible</span>
             </section>
 
             {(loading || preferencesLoading) && (
@@ -372,7 +436,9 @@ export default function Home() {
             )}
 
             {!loading && filteredQuestions.length === 0 && (
-              <div className="panel-surface p-6 text-sm text-[var(--text-2)]">No questions in this topic yet.</div>
+              <div className="panel-surface p-8 text-sm text-[var(--text-2)]">
+                No questions in this topic yet.
+              </div>
             )}
 
             {!loading && filteredQuestions.length > 0 && (

@@ -28,13 +28,13 @@ const AdminExamplesEditor = ({ examples, onChange }: AdminExamplesEditorProps) =
   return (
     <div className="space-y-3">
       {examples.map((example, index) => (
-        <div key={example.id ?? `example-${index}`} className="panel-surface p-4">
+        <div key={example.id ?? `example-${index}`} className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-2)] p-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm font-semibold text-[var(--text-1)]">Example {index + 1}</p>
             <button
               type="button"
               onClick={() => onChange(examples.filter((_, itemIndex) => itemIndex !== index))}
-              className="btn-ghost border border-[var(--border)] p-2 text-[var(--text-2)]"
+              className="icon-button"
               aria-label={`Remove example ${index + 1}`}
             >
               <Trash2 size={14} />
@@ -81,7 +81,7 @@ const AdminExamplesEditor = ({ examples, onChange }: AdminExamplesEditorProps) =
             <textarea
               value={example.codeSnippet ?? ''}
               onChange={(event) => updateExample(index, { codeSnippet: event.target.value })}
-              className="search-input min-h-24 font-mono text-xs"
+              className="search-input code-editor-input min-h-24 font-mono text-xs"
               placeholder="Code snippet"
             />
           </div>

@@ -39,7 +39,7 @@ const AppStatusBanner = ({ variant, message, actionLabel, onAction }: AppStatusB
   const Icon = meta.icon;
 
   return (
-    <div className={`status-banner mb-6 ${meta.className}`}>
+    <div className={`status-banner ${meta.className}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-start gap-2.5 text-[var(--text-2)]">
           <Icon size={16} className={variant === 'loading' ? 'animate-spin' : ''} />

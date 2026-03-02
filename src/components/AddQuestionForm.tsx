@@ -30,8 +30,8 @@ const topicOverrideOptions = ['react', 'javascript'] as const;
 
 const getLabelClassName = (highlight: boolean): string =>
   highlight
-    ? 'mb-1.5 block text-sm text-[color-mix(in_srgb,var(--burnt-tangerine)_88%,white)]'
-    : 'mb-1.5 block text-sm text-[var(--text-2)]';
+    ? 'mb-1.5 block text-sm font-medium text-[var(--brand-secondary)]'
+    : 'mb-1.5 block text-sm font-medium text-[var(--text-2)]';
 
 const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
   const [rawInput, setRawInput] = useState('');
@@ -58,6 +58,8 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
 
   const isMissingField = (field: AdminQuestionDraftField): boolean =>
     hasParsedDraft && validation.missingFields.includes(field);
+
+  const currentStep = !hasParsedDraft ? 1 : !validation.canSave ? 3 : 4;
 
   const handleParse = async () => {
     if (!rawInput.trim()) {
@@ -150,12 +152,47 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <p className="rounded-xl border border-[color-mix(in_srgb,var(--burnt-tangerine)_45%,var(--border))] bg-[color-mix(in_srgb,var(--burnt-tangerine)_16%,transparent)] p-2.5 text-sm text-[var(--text-1)]">
+        <p className="rounded-2xl border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] p-3 text-sm text-[var(--text-1)]">
           {error}
         </p>
       )}
 
-      <div className="space-y-4 rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_74%,transparent)] p-4">
+      <div className="rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-2)] p-4">
+        <div className="mb-5 grid gap-2 sm:grid-cols-4">
+          {['Paste', 'Parse', 'Review', 'Save'].map((step, index) => {
+            const stepNumber = index + 1;
+            const active = currentStep === stepNumber;
+            const complete = currentStep > stepNumber;
+
+            return (
+              <div
+                key={step}
+                className={`rounded-2xl border px-3 py-3 ${
+                  complete || active
+                    ? 'border-[color-mix(in_srgb,var(--brand-primary)_18%,var(--border))] bg-[color-mix(in_srgb,var(--brand-primary)_8%,var(--surface-1))]'
+                    : 'border-[var(--border)] bg-[var(--surface-1)]'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`grid h-6 w-6 place-items-center rounded-full text-xs font-semibold ${
+                      complete
+                        ? 'bg-[var(--brand-primary)] text-white'
+                        : active
+                          ? 'bg-[color-mix(in_srgb,var(--brand-primary)_14%,var(--surface-1))] text-[var(--brand-primary)]'
+                          : 'bg-[var(--surface-2)] text-[var(--text-3)]'
+                    }`}
+                  >
+                    {stepNumber}
+                  </span>
+                  <span className="text-sm font-medium text-[var(--text-1)]">{step}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="space-y-4">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
             Step 1
@@ -235,11 +272,12 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
             </p>
           )}
         </div>
+        </div>
       </div>
 
       {hasParsedDraft && (
         <div className="space-y-5">
-          <div className="space-y-4 rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_74%,transparent)] p-4">
+          <div className="space-y-4 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-2)] p-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
                 Step 2
@@ -283,7 +321,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
             </div>
           </div>
 
-          <div className="space-y-5 rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_74%,transparent)] p-4">
+          <div className="space-y-5 rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface-1)] p-4 md:p-5">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-3)]">
                 Core Content
@@ -493,7 +531,7 @@ const AddQuestionForm = ({ onCreated }: AddQuestionFormProps) => {
                     id="codeSnippet"
                     value={draft.codeSnippet}
                     onChange={(event) => setDraftField('codeSnippet', event.target.value)}
-                    className="search-input min-h-24 w-full font-mono text-xs"
+                    className="search-input code-editor-input min-h-24 w-full font-mono text-xs"
                   />
                 </div>
               </div>

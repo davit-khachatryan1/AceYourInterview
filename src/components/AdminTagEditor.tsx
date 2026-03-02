@@ -38,7 +38,7 @@ const AdminTagEditor = ({ tags, onChange }: AdminTagEditorProps) => {
   };
 
   return (
-    <div className="panel-surface space-y-3 p-3">
+    <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface-2)] p-3">
       <div className="flex gap-2">
         <input
           value={draft}
@@ -57,7 +57,7 @@ const AdminTagEditor = ({ tags, onChange }: AdminTagEditorProps) => {
         </button>
       </div>
 
-      <div className="space-y-2">
+      <div className="mt-3 space-y-2">
         {tags.map((tag, index) => (
           <div
             key={tag}
@@ -71,7 +71,7 @@ const AdminTagEditor = ({ tags, onChange }: AdminTagEditorProps) => {
               onChange(reorder(tags, dragIndex, index));
               setDragIndex(null);
             }}
-            className="interactive-row flex items-center justify-between px-2 py-1.5"
+            className="interactive-row flex items-center justify-between px-2.5 py-2"
           >
             <span className="inline-flex items-center gap-2 text-xs text-[var(--text-1)]">
               <GripVertical size={13} className="text-[var(--text-3)]" />
